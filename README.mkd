@@ -1,0 +1,4 @@
+# Sync Server
+
+This is a simple rest API to create new repos. The django apps calls
+`staging/create_repo.sh`. 

@@ -1,0 +1,15 @@
+*.pyc
+logs
+*.db
+*.swp
+*.swo
+.vagrant
+.vagrant*
+
+
+# pycharm
+*.idea
+
+# codekit
+*-ck.js
+
