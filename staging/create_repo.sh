@@ -15,7 +15,7 @@ fi
 
 # Strip off any funny business
 REPO_NAME=$(basename $2)
-REPO_DIR=${BASE_DIR}/${REPO_NAME:0:2}/${REPO_NAME}
+REPO_DIR=${BASE_DIR}/${REPO_NAME}
 
 echo "Setting up directories"
 mkdir -p $REPO_DIR
