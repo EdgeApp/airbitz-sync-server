@@ -14,8 +14,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Strip off any funny business
-REPO_NAME=$2
-REPO_DIR=${BASE_DIR}/${REPO_NAME}
+REPO_NAME=$(basename $2)
+REPO_DIR=${BASE_DIR}/${REPO_NAME:0:2}/${REPO_NAME}
 
 echo "Setting up directories"
 mkdir -p $REPO_DIR
