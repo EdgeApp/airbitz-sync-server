@@ -28,9 +28,7 @@ echo "Creating repos"
 cd ${REPO_DIR}
 
 git init --bare 
-git update-server-info
-cp /usr/share/git-core/templates/hooks/post-update.sample hooks/post-update
-chmod a+x hooks/post-update
+git config --file config http.receivepack true
 chown -R www-data:www-data .
 
 echo "Created repo at ${REPO_DIR}"
