@@ -1,0 +1,44 @@
+#!/bin/sh
+
+GITCMD="/usr/bin/git"
+NULLSHA="0000000000000000000000000000000000000000"
+MAXSIZE="$(( 1024 * 1024 ))" # 1MB limit on file size
+EXIT=0
+
+# Read stdin for ref information
+while read oldref newref refname; do
+  # Skip branch deletions
+  echo "New ref: ${newref}"
+  if [ "${newref}" = "${NULLSHA}" ]; then
+    continue;
+  fi
+
+  echo "Old ref: ${oldref}"
+  # Set oldref properly if this is branch creation.
+  if [ "${oldref}" = "${NULLSHA}" ]; then
+    oldref="HEAD"
+  fi
+
+  # Get list of files to look at using git diff
+  for file in $($GITCMD diff --stat --name-only --diff-filter=ACMRT ${oldref}..${newref}); do
+    echo "File: $file"
+    # Get the size of this file
+    size=$($GITCMD cat-file -s ${newref}:${file})
+    # Check to see if for some reason we didn't get a size
+    if [ ! -z ${size} ]; then
+      # Compare filesize to MAXSIZE
+      if [ "${size}" -gt "${MAXSIZE}" ]; then
+        # Send output back to the user about oversized files.
+        echo "ERROR: ${file} larger than ${MAXSIZE}."
+        EXIT=1
+      fi # End size comparison
+    fi   # End check for empty size
+  done   # End list of files
+done     # End reading stdin
+
+# If we have oversized files, write more information out to the user
+if [ "${EXIT}" = "1" ]; then
+  echo "ERROR: Your commit has been blocked due to certain files being oversized."
+  echo "ERROR: Check output above for more information."
+  exit ${EXIT}
+fi
