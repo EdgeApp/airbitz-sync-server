@@ -7,7 +7,7 @@ import sys
 
 def get_servers():
     config = ConfigParser.ConfigParser()
-    config.read('/etc/absync.conf')
+    config.read('/etc/absync/absync.conf')
     return config.get('Servers', 'servers').split(",")
 
 def create_repo_url(url):
@@ -17,8 +17,8 @@ def create_repo_url(url):
 
 def request_repo(url, name):
     import json, urllib2
-    data = json.dumps({"repo_name", name})
-    req = urllib2.Request(create_repo_url(), data, {'Content-Type': 'application/json'})
+    data = json.dumps({"repo_name": name})
+    req = urllib2.Request(create_repo_url(url), data, {'Content-Type': 'application/json'})
     try:
         s = urllib2.urlopen(req)
         return s.getcode() in (200, 201)
@@ -31,11 +31,10 @@ basename = os.path.basename(os.getcwd())
 # Sync master branches across other servers
 for server in SERVERS:
     path = "{0}/{1}".format(server, basename)
-    if subprocess.call(["git", "push", path, "master"]) > 0:
+    if subprocess.call(["git", "push", path, "master"], stdout=False, stderr=False) > 0:
         if path.find('://') > 0:
-            success = request_repo()
+            success = request_repo(server, basename)
         else:
-            subprocess.call(["mkdir", "-p", path])
+            subprocess.call(["mkdir", "-p", path], stdout=False, stderr=False)
             success = subprocess.call(["git", "init", "--bare", path]) == 0
         subprocess.call(["git", "push", path, "master"])
-

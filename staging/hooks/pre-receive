@@ -8,12 +8,15 @@ EXIT=0
 # Read stdin for ref information
 while read oldref newref refname; do
   # Skip branch deletions
-  echo "New ref: ${newref}"
   if [ "${newref}" = "${NULLSHA}" ]; then
     continue;
   fi
 
-  echo "Old ref: ${oldref}"
+  # Confirm revision exists
+  if [ -n "$(git show $newref 2>/dev/null)" ]; then
+    newref="HEAD";
+  fi
+
   # Set oldref properly if this is branch creation.
   if [ "${oldref}" = "${NULLSHA}" ]; then
     oldref="HEAD"

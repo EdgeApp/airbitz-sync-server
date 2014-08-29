@@ -9,7 +9,6 @@ fi
 BASE_DIR=$1
 mkdir -p ${BASE_DIR}
 if [ $? -ne 0 ]; then
-    echo "Unable to create repos directory"
     exit 1
 fi
 
@@ -29,6 +28,8 @@ cd ${REPO_DIR}
 
 git init --bare 
 git config --file config http.receivepack true
+rm -rf hooks
+ln -s /etc/absync/hooks .
 chown -R www-data:www-data .
 
 echo "Created repo at ${REPO_DIR}"
