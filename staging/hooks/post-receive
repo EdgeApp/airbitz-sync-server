@@ -20,7 +20,7 @@ def request_repo(url, name):
     data = json.dumps({"repo_name": name})
     req = urllib2.Request(create_repo_url(url), data, {'Content-Type': 'application/json'})
     try:
-        s = urllib2.urlopen(req)
+        s = urllib2.urlopen(req, timeout=1)
         return s.getcode() in (200, 201)
     except:
         return False
