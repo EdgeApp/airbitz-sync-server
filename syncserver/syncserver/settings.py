@@ -20,14 +20,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = 'n3l=ykrfn)vwijbl6khi8^^d7b#s99n%fmzef6=-gb9z_s_#0d'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
+TEMPLATE_DEBUG = False
+ALLOWED_HOSTS = [ '.airbitz.co' ]
+SYS_USER = getpass.getuser()
+PRODUCTION = SYS_USER in ('bitz', )
+DEBUG = not PRODUCTION
 
 INSTALLED_APPS = (
     'django.contrib.admin',
