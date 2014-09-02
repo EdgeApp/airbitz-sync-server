@@ -12,11 +12,6 @@ while read oldref newref refname; do
     continue;
   fi
 
-  # Confirm revision exists
-  if [ -n "$(git show $newref 2>/dev/null)" ]; then
-    newref="HEAD";
-  fi
-
   # Set oldref properly if this is branch creation.
   if [ "${oldref}" = "${NULLSHA}" ]; then
     oldref="HEAD"
