@@ -31,10 +31,10 @@ basename = os.path.basename(os.getcwd())
 # Sync master branches across other servers
 for server in SERVERS:
     path = "{0}/{1}".format(server, basename)
-    if subprocess.call(["git", "push", path, "master"], stdout=False, stderr=False) > 0:
+    if subprocess.call(["ab-sync", ".", path], stdout=False, stderr=False) > 0:
         if path.find('://') > 0:
             success = request_repo(server, basename)
         else:
             subprocess.call(["mkdir", "-p", path], stdout=False, stderr=False)
             success = subprocess.call(["git", "init", "--bare", path]) == 0
-        subprocess.call(["git", "push", path, "master"])
+        subprocess.call(["ab-sync", ".", path])
