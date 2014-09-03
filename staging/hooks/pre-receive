@@ -2,7 +2,7 @@
 
 GITCMD="/usr/bin/git"
 NULLSHA="0000000000000000000000000000000000000000"
-MAXSIZE="$(( 1024 * 1024 ))" # 1MB limit on file size
+MAXSIZE="$(( 1024 * 1024 + 1024 * 256 ))" # 1MB limit on file size
 EXIT=0
 
 # Read stdin for ref information
