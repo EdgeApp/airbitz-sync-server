@@ -37,4 +37,4 @@ for server in SERVERS:
         else:
             subprocess.call(["mkdir", "-p", path], stdout=False, stderr=False)
             success = subprocess.call(["git", "init", "--bare", path]) == 0
-        subprocess.call(["ab-sync", ".", path])
+        subprocess.call(["git", "push", path, "master"])
