@@ -28,7 +28,10 @@ cd ${REPO_DIR}
 
 git init --bare 
 git config --file config http.receivepack true
+git config receive.denyDeletes true
+git config receive.denyNonFastForwards true
 rm -rf hooks
+rm -f description
 ln -s /etc/absync/hooks .
 chown -R www-data:www-data .
 
