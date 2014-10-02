@@ -10,8 +10,8 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import getpass
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -19,9 +19,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'n3l=ykrfn)vwijbl6khi8^^d7b#s99n%fmzef6=-gb9z_s_#0d'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 TEMPLATE_DEBUG = False
-ALLOWED_HOSTS = [ '.airbitz.co' ]
+ALLOWED_HOSTS = [ '*' ]
 SYS_USER = getpass.getuser()
 PRODUCTION = SYS_USER in ('bitz', )
 DEBUG = not PRODUCTION
