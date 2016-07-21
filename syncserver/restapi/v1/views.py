@@ -23,6 +23,7 @@ class RepoCreate(APIView):
     repo_serializer = RepoSerializer
 
     def common(self, request):
+        print request.DATA
         ser = self.repo_serializer(data=request.DATA)
         if ser.is_valid():
             return create_repo(ser.object.repo_name)
