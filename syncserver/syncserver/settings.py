@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import sys
 import os
 import getpass
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -95,4 +96,65 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
     )
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+        'verbose':    {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        }
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'console':{
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': sys.stdout
+        },
+        'catch-all':  {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout
+        },
+        'errors':  {
+            'level': 'WARNING',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': '/tmp/error.log',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/tmp/sync.log',
+        },
+    },
+    'loggers': {
+        'syncserver': {
+            'handlers': ['file', 'console', 'catch-all', 'errors'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'restapi': {
+            'handlers': ['file', 'console', 'catch-all', 'errors'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'django.request': {
+            'handlers': ['file', 'console', 'catch-all', 'errors'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
 }
