@@ -5,6 +5,7 @@ logs
 *.swo
 .vagrant
 .vagrant*
+.env
 
 
 # pycharm
