@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from subprocess import check_call, CalledProcessError
 
 EXE_PATH="/create_repo.sh"
+from tasks import sync_repo
 
 class RepoObject(object):
     def __init__(self, repo_name=None):
@@ -39,3 +40,7 @@ class RepoCreate(APIView):
     def post(self, request):
         return self.common(request)
 
+class RepoSync(APIView):
+    def get(self, request, storeId):
+        sync_repo.delay(storeId)
+        return Response(status=status.HTTP_200_OK)
