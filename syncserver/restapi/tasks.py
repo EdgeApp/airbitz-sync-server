@@ -34,12 +34,12 @@ def sync_repo(storeId):
 
     for server in SERVERS:
         path = "{0}/{1}".format(server, storeId)
-        subprocess.call(["git", "branch", "-D", "incoming"], stdout=False, stderr=False)
-        if subprocess.call(["ab-sync", ".", path], stdout=False, stderr=False) > 0:
+        subprocess.call(["/usr/bin/git", "branch", "-D", "incoming"], stdout=False, stderr=False)
+        if subprocess.call(["/usr/bin/ab-sync", ".", path], stdout=False, stderr=False) > 0:
             if path.find('://') > 0:
                 success = request_repo(server, storeId)
             else:
-                subprocess.call(["mkdir", "-p", path], stdout=False, stderr=False)
-                success = subprocess.call(["git", "init", "--bare", path]) == 0
-            subprocess.call(["git", "push", path, "master"])
+                subprocess.call(["/bin/mkdir", "-p", path], stdout=False, stderr=False)
+                success = subprocess.call(["/usr/bin/git", "init", "--bare", path]) == 0
+            subprocess.call(["/usr/bin/git", "push", path, "master"])
 
