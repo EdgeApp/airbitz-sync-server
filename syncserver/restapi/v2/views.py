@@ -58,7 +58,7 @@ def git_change_dict(path, rev=None):
         file_contents = git_file_lists(path, rev=rev)
         return {
             "hash": current_hash,
-            "changes": [{'key': k, 'value': v} for k,v in file_contents.iteritems()]
+            "changes": file_contents
         }
 
 def gen_id():
@@ -71,11 +71,10 @@ def git_update(path, storeId, changes, start_hash=None):
     working_tree='{0}/{1}{2}'.format(TMP_DIR, storeId, gen_id())
     print working_tree
     os.makedirs(working_tree)
-    for change in changes:
-        filename=change['key']
-        filepath=working_tree + '/' + filename
-        f = open(working_tree + '/' + change['key'], 'wb')
-        f.write(change['value'])
+    for k,v in changes.iteritems():
+        filename = k
+        f = open(working_tree + '/' + filename, 'wb')
+        f.write(v)
         f.close()
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "add", filename], cwd=working_tree)
     check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "commit", "-m", "New commit"], cwd=working_tree)
