@@ -3,8 +3,10 @@ from rest_framework import status
 from rest_framework.response import Response 
 from rest_framework.views import APIView
 from subprocess import check_call, CalledProcessError
+from django.conf import settings
 
-EXE_PATH="/create_repo.sh"
+# We can change this
+EXE_PATH="/usr/bin/create_ab_repo.sh"
 from tasks import sync_repo
 
 class RepoObject(object):
@@ -27,7 +29,7 @@ class RepoCreate(APIView):
         ser = self.repo_serializer(data=request.DATA)
         if ser.is_valid():
             try:
-                check_call(['sudo', EXE_PATH, '/var/www/html/repos/', ser.object.repo_name])
+                check_call([EXE_PATH, settings.REPO_PATH, ser.object.repo_name])
                 return Response(status=status.HTTP_200_OK)
             except CalledProcessError:
                 return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

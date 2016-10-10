@@ -158,3 +158,7 @@ LOGGING = {
         },
     }
 }
+if PRODUCTION:
+    REPO_PATH = '/home/bitz/www/repos'
+else:
+    REPO_PATH = '/home/vagrant/www/repos'
