@@ -1,5 +1,6 @@
 from celery import shared_task
 import ConfigParser, os, subprocess, sys
+from django.conf import settings
 
 def get_servers():
     config = ConfigParser.ConfigParser()
@@ -21,12 +22,11 @@ def request_repo(url, name):
     except:
         return False
 
-BASE='/var/www/html/repos/'
 SERVERS = get_servers()
 
 @shared_task
 def sync_repo(storeId):
-    repo_dir="{0}/{1}/{2}".format(BASE, storeId[:2], storeId)
+    repo_dir="{0}/{1}/{2}".format(settings.REPO_PATH, storeId[:2], storeId)
     os.chdir(repo_dir)
 
     print SERVERS
