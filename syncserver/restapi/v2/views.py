@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from subprocess import check_call, check_output, CalledProcessError
 from django.conf import settings
 
-import json, os, random, string
+import json, os, os.path, random, string
 
 from restapi.utils import create_repo
 
@@ -44,7 +44,10 @@ def git_file_lists(path, rev=None):
     file_contents = {}
     print changed_files
     for f in changed_files:
-        file_contents[f] = git_show(path, f)
+        try:
+            file_contents[f] = json.loads(git_show(path, f))
+        except:
+            continue
     return file_contents
 
 def git_change_dict(path, rev=None):
@@ -64,6 +67,14 @@ def git_change_dict(path, rev=None):
 def gen_id():
     return ''.join([random.choice(string.digits + string.letters) for i in range(0, 30)])
 
+# Returns true if there are no changes staged to commit
+def git_dirty(path, working_tree):
+    try:
+        check_output(['git', "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), 'diff-index', '--quiet', '--cached', 'HEAD'], cwd=path)
+        return False
+    except Exception as e:
+        return True
+
 def git_update(path, storeId, changes, start_hash=None):
     check_output(['git', 'config', '--global', 'user.email', 'api@airbitz.co'])
     check_output(['git', 'config', '--global', 'user.name', 'Airbitz API'])
@@ -73,11 +84,18 @@ def git_update(path, storeId, changes, start_hash=None):
     os.makedirs(working_tree)
     for k,v in changes.iteritems():
         filename = k
+        try:
+            os.makedirs(working_tree + '/' + os.path.dirname(filename))
+        except:
+            pass
         f = open(working_tree + '/' + filename, 'wb')
-        f.write(v)
+        f.write(json.dumps(v))
         f.close()
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "add", filename], cwd=working_tree)
-    check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "commit", "-m", "New commit"], cwd=working_tree)
+    if git_dirty(path, working_tree):
+        check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "commit", "-m", "web commit"], cwd=working_tree)
+    else:
+        print 'No changes to commit'
     try:
         # run post receive hook
         check_output(["./hooks/post-receive".format(path)], cwd=path)
