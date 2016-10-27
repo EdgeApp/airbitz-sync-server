@@ -24,18 +24,17 @@ class V1RepoTests(unittest.TestCase):
         return requests.put(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
 
 class V2RepoTests(unittest.TestCase):
-    STORE_ID=''.join([random.choice(string.digits + string.letters) for i in range(0, 10)])
-    API_PATH=HOST + '/api/v2/store/{0}'.format(STORE_ID)
+    STORE_ID=''.join([random.choice(string.hexdigits) for i in range(0, 20)])
+    API_PATH=HOST + '/api/v2/store/{0}/'.format(STORE_ID)
 
     @classmethod
     def setUpClass(cls):
         print 'Creating repo ', cls.STORE_ID
         requests.put(cls.API_PATH, data=json.dumps({}), headers=HEADERS, verify=False)
         payload={
-            "hash": None,
-            "changes": [
-                {"key": "readme.md", "value": "Default file"},
-            ]
+            "changes": {
+                "readme.md": "Default file"
+            }
         }
         requests.post(cls.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
 
@@ -44,21 +43,18 @@ class V2RepoTests(unittest.TestCase):
         self.assertEqual(r.status_code, 409)
 
     def test_get(self):
-        payload={ "hash": None }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH, data="", headers=HEADERS, verify=False)
         print 'Test Get'
         print '\t', r.text
         self.assertEqual(r.status_code, 200)
         last_hash = r.json()['hash']
 
-        payload={ "hash": "thisisabadhash" }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH + "thisisabadhash", data="", headers=HEADERS, verify=False)
         print 'Test Bad Hash '
-        print '\t', r.text
+        # print '\t', r.text
         self.assertEqual(r.status_code, 404)
 
-        payload={ "hash": last_hash }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH + last_hash, data="", headers=HEADERS, verify=False)
         print 'Test Last Hash ', last_hash
         print '\t', r.text
         self.assertEqual(r.status_code, 200)
@@ -72,14 +68,13 @@ class V2RepoTests(unittest.TestCase):
         first_hash = r.json()['hash']
 
         payload={
-            "hash": first_hash,
-            "changes": [
-                {"key": "file1.txt", "value": "This is file 1"},
-                {"key": "file2.txt", "value": "This is file 2"},
-                {"key": "file3.txt", "value": "This is file 3"},
-            ]
+            "changes": {
+                "file1.txt": "This is file 1",
+                "file2.txt": "This is file 2",
+                "file3.txt": "This is file 3",
+            }
         }
-        r = requests.post(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.post(self.API_PATH + first_hash, data=json.dumps(payload), headers=HEADERS, verify=False)
         self.assertEqual(r.status_code, 200)
         print 'Test Put'
         print '\t', r.text
@@ -87,40 +82,35 @@ class V2RepoTests(unittest.TestCase):
         self.assertEqual(len(r.json()['changes']), 3)
         second_hash = r.json()['hash']
 
-        payload={ "hash": second_hash }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH + second_hash, data="", headers=HEADERS, verify=False)
         print 'Test Previous Hash ', second_hash
         print '\t', r.text
         self.assertEqual(r.status_code, 200)
 
         payload={
-            "hash": second_hash,
-            "changes": [
-                {"key": "file3.txt", "value": "NEW VALUE FOR 3"},
-            ]
+            "changes": {
+                "file3.txt": "NEW VALUE FOR 3",
+            }
         }
-        r = requests.post(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.post(self.API_PATH + second_hash, data=json.dumps(payload), headers=HEADERS, verify=False)
         self.assertEqual(r.status_code, 200)
         print 'Test Put Change File 3'
         print '\t', r.text
         
-        payload={ "hash": None }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH, data="", headers=HEADERS, verify=False)
         print 'Test Entire History'
         print '\t', r.text
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.json()['changes']), 4)
         last_hash = r.json()['hash']
 
-        payload={ "hash": second_hash }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH + second_hash, data="", headers=HEADERS, verify=False)
         print 'Test Previous Hash ', second_hash
         print '\t', r.text
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.json()['changes']), 1)
 
-        payload={ "hash": last_hash }
-        r = requests.get(self.API_PATH, data=json.dumps(payload), headers=HEADERS, verify=False)
+        r = requests.get(self.API_PATH + last_hash, data="", headers=HEADERS, verify=False)
         print 'Test Last Hash ', last_hash
         print '\t', r.text
         self.assertEqual(r.status_code, 200)
