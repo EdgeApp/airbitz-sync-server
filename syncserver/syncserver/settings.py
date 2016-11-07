@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'restapi',
@@ -41,6 +42,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -52,6 +54,9 @@ ROOT_URLCONF = 'syncserver.urls'
 
 WSGI_APPLICATION = 'syncserver.wsgi.application'
 
+# Allow requests from any domain
+CORS_ORIGIN_ALLOW_ALL=True
+CORS_URLS_REGEX = r'^/api/v2/store/.*$'
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
