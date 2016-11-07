@@ -1,5 +1,4 @@
-Django==1.6.2
-South==0.8.4
+Django==1.8
 Unipath==1.0
 amqp==1.4.9
 anyjson==0.3.3
