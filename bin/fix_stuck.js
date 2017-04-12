@@ -1,10 +1,30 @@
-#!/usr/bin/nodejs
-
 const fs = require('fs')
 const cs = require('child_process')
 
 var procs = []
 var newProcs = []
+
+
+var psresult = cs.execFileSync('ps', ['xau'], { encoding: 'utf8' })
+const psArray = psresult.split('\n')
+var numRunning = 0
+for (var i in psArray) {
+  if (psArray[i].includes('fix_stuck.js')) {
+    numRunning++
+  }
+}
+
+// Check if script is already running
+//
+// fix_stuck.js is designed to be run as a cron job using a line such as
+// 0 23 * * * node $HOME/fix_stuck.js 2>&1 1>$HOME/fix_stuck.log
+// Run this way, two lines containing 'fix_stuck.js' will show in the process list
+// therefore we check for >2 to determine if we are already running
+if (numRunning > 2) {
+  console.log('fix_stuck.js already running. Exiting')
+  return
+}
+
 
 myMain()
 

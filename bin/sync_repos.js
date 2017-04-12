@@ -20,10 +20,16 @@ for (var i in psArray) {
 // Run this way, two lines containing 'sync_repos.js' will show in the process list
 // therefore we check for >2 to determine if we are already running
 if (numRunning > 2) {
-  console.log('sync_repos.js already running. Exiting')
+  var date = new Date()
+  var log = date.toDateString() + ":" + date.toTimeString()
+  console.log(log + ' sync_repos.js already running. Exiting')
   return
 }
 
+var gdate = new Date()
+var glog = gdate.toDateString() + ":" + gdate.toTimeString()
+
+console.log(glog + ' sync_repos.js starting')
 // const rootdir = '/Users/paul/git'
 const rootdir = '/home/bitz/www/repos'
 const servers = require('/etc/absync/absync.json')
@@ -32,10 +38,12 @@ const dir = fs.readdirSync(rootdir)
 
 var allDirs = []
 
+var run_subset = false
+
 for (var f = 0; f < dir.length; f++) {
 
   // For testing only look for 'wa...' directories which are testing only
-  if (false && !dir[f].startsWith('wa')) {
+  if (run_subset && !dir[f].startsWith('ff')) {
     continue
   }
 
@@ -46,7 +54,7 @@ for (var f = 0; f < dir.length; f++) {
     const dir2 = fs.readdirSync(path)
     for (var f2 = 0; f2 < dir2.length; f2++) {
       // For testing only look for 'wa...' directories which are testing only
-      if (false && !dir2[f2].startsWith('wa')) {
+      if (run_subset && !dir2[f2].startsWith('ffff')) {
         continue
       }
       const path2 = path + '/' + dir2[f2]
@@ -65,18 +73,28 @@ for (var f = 0; f < dir.length; f++) {
 }
 // console.log(allDirs)
 
-pushRepoLoop(allDirs, 0)
+pushRepoLoop(allDirs, allDirs.length)
 
-function pushRepoLoop (dirs, index) {
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
 
-  console.log('pushRepoLoop ' + index)
-  if (dirs.length <= index) {
+function pushRepoLoop (dirs, length) {
+
+  const completed = (length - dirs.length)
+  console.log('pushRepoLoop ' + completed + " of " + length)
+
+  if (dirs.length <= 0) {
     return
   } else {
+    const index = getRandomInt(0, dirs.length - 1)
     pushRepo(dirs[index])
+    dirs.splice(index, 1)
     setTimeout(function () {
-      pushRepoLoop(dirs, index + 1)
-    }, 3000)
+      pushRepoLoop(dirs, length)
+    }, 1000)
   }
 }
 
@@ -104,7 +122,7 @@ function pushRepoToServer (repo, server) {
   }
 
   try {
-    child_process.execFileSync('ab-sync', [repo.fullPath, path], { stdio: std, cwd: repo.fullPath, killSignal: 'SIGKILL' })
+    child_process.execFileSync('ab-sync', [repo.fullPath, path], { timeout: 20000, stdio: std, cwd: repo.fullPath, killSignal: 'SIGKILL' })
     console.log('  [ab-sync success]')
   } catch (e) {
     console.log('  [ab-sync failed]')
@@ -112,7 +130,7 @@ function pushRepoToServer (repo, server) {
   }
 
   try {
-    child_process.execFileSync('git', ['push', path, 'master'], { stdio: std, cwd: repo.fullPath, killSignal: 'SIGKILL' })
+    child_process.execFileSync('git', ['push', path, 'master'], { timeout: 20000, stdio: std, cwd: repo.fullPath, killSignal: 'SIGKILL' })
     console.log('  [git push success]')
   } catch (e) {
     console.log('  [git push failed]')
