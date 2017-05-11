@@ -47,7 +47,7 @@ function loopWriteRepoList() {
     if (error) {
       console.log (error)
     }
-    fs.writeFile(config.userDir + 'repolist.txt', stdout, (err) => {
+    fs.writeFile(config.repoListPath + 'repolist.txt', stdout, (err) => {
       if (err) {
         console.log (err)
       } else {
