@@ -6,6 +6,7 @@ logs
 .vagrant
 .vagrant*
 .env
+node_modules/
 
 
 # pycharm

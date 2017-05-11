@@ -1,0 +1,7 @@
+PATH=/usr/sbin:/usr/bin:/bin
+HOME=/home/bitz
+BIN=$HOME/code/airbitz-sync-server/bin
+*/5 * * * * $BIN/check_apk.sh 2>&1 >> $HOME/check_apk.log
+0 20 15 * * $BIN/gc_repos.sh 2>&1 1>$HOME/gc_repos.log
+30 2 * * * node $BIN/sync_repos.js 2>&1 1>$HOME/sync_repos.log
+*/5 * * * * node $BIN/fix_stuck.js 2>&1 1>$HOME/fix_stuck.log
