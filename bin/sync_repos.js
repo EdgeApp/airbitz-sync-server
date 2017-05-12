@@ -37,38 +37,14 @@ const rootDir = config.userDir + config.reposDir
 // const rootDir = '/home/bitz/www/repos'
 const servers = require('/etc/absync/absync.json')
 
-// Spin off the loop that creates the repolist for this machine
-function loopWriteRepoList() {
-  child_process.execFile('find', [ rootDir, '-maxdepth', '2', '-mindepth', '2'], {
-    stdio: std,
-    cwd: config.userDir,
-    killSignal: 'SIGKILL'
-  }, (error, stdout, stderr) => {
-    if (error) {
-      console.log (error)
-    }
-    fs.writeFile(config.repoListPath + 'repolist.txt', stdout, (err) => {
-      if (err) {
-        console.log (err)
-      } else {
-        console.log('repolist created');
-        setTimeout(() => {
-          loopWriteRepoList()
-        }, 300000)
-      }
-    });
-    console.log(stdout);
-  })
+mainLoop()
 
-}
-
-loopWriteRepoList()
-
-while (true) {
+function mainLoop () {
   let doRepoDiffs = true
   let localRepos = getLocalDirs()
   let remoteRepos = getRemoteRepoList()
   let intersectRepos = intersect(localRepos, remoteRepos)
+  console.log('intersectRepos:' + intersectRepos.length)
   let bFirst = true
 
   let numTotalRepos = localRepos.length
@@ -85,7 +61,7 @@ while (true) {
     // Do those first before anything else
     const diff = arrayDiff(localRepos, remoteRepos)
     if (diff.length > 0) {
-      console.log('Call pushRepoLoop for diffs')
+      console.log('Call pushRepoLoop for diffs:' + diff.length)
       pushRepoLoop(diff)
     } else {
       doRepoDiffs = false
@@ -93,21 +69,26 @@ while (true) {
   }
   console.log('Call pushRepoLoop for intersection')
   pushRepoLoop(intersectRepos)
+
+  setTimeout(() => {
+    mainLoop()
+  }, 1000)
 }
 
 function getRemoteRepoList () {
-
+  console.log('ENTER getRemoteRepoList')
   let repoLists = []
   for (let n = 0; n < servers.length; n++) {
     // Rsync the remote file list from remote server
     const userAtServer = 'readuser@' + servers[n] + ":repolist.txt"
     const serverFile = 'repos-' + servers[n] + '.txt'
     try {
-      child_process.execFileSync('rsync', [ userAtServer, serverFile ], {
+      child_process.execFileSync('rsync', [ userAtServer, config.userDir + serverFile ], {
         stdio: std,
         cwd: config.userDir,
         killSignal: 'SIGKILL'
       })
+      console.log('  [rsync success] ' + userAtServer)
     } catch (e) {
       console.log('  [rsync failed] ' + userAtServer)
       continue
@@ -123,6 +104,7 @@ function getRemoteRepoList () {
         remoteRepoList.push(file)
       }
     }
+    console.log('    Num repos:' + remoteRepoList.length)
     repoLists.push(remoteRepoList)
   }
   let finalList = repoLists[0]
@@ -130,7 +112,9 @@ function getRemoteRepoList () {
   for (var n = 1; n < repoLists.length; n++) {
     finalList = [...new Set([...finalList, ...repoLists[n]])]
   }
-  return Array.from(finalList)
+  const finalListArray = Array.from(finalList)
+  console.log('finalList size:' + finalList.length)
+  return finalList
 }
 
 function arrayDiff(a, b) {
@@ -138,14 +122,23 @@ function arrayDiff(a, b) {
 }
 
 function intersect(a, b) {
-  var t;
-  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
-  return a.filter(function (e) {
-    return b.indexOf(e) > -1;
-  });
+  const alen = a.length
+  const blen = b.length
+
+  if (blen > alen) {
+    return b.filter(function (e) {
+      return a.indexOf(e) > -1
+    })
+  } else {
+    return a.filter(function (e) {
+      return b.indexOf(e) > -1
+    })
+  }
+
 }
 
 function getLocalDirs() {
+  console.log('ENTER getLocalDirs')
   const dir = fs.readdirSync(rootDir)
 
 // Add a diff method to arrays
@@ -181,6 +174,7 @@ function getLocalDirs() {
     // console.log(dir[f] + ' is ' + stat.isDirectory())
   }
 // console.log(allDirs)
+  console.log('  num repos:' + allDirs.length)
   return allDirs
 }
 
