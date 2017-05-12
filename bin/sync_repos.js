@@ -106,12 +106,17 @@ function getRemoteRepoList () {
     console.log('    Num repos:' + remoteRepoList.length)
     repoLists.push(remoteRepoList)
   }
-  let finalList = repoLists[0]
 
-  for (var n = 1; n < repoLists.length; n++) {
-    finalList = [...new Set([...finalList, ...repoLists[n]])]
+  let indexOfSmallestRepo = 0
+  let sizeOfSmallestRepo = 999999999
+  for (var n = 0; n < repoLists.length; n++) {
+    if (repoLists[n].length < sizeOfSmallestRepo) {
+      indexOfSmallestRepo = n
+      sizeOfSmallestRepo = repoLists[n].length
+    }
+    // finalList = [...new Set([...finalList, ...repoLists[n]])]
   }
-  const finalListArray = Array.from(finalList)
+  const finalList = repoLists[indexOfSmallestRepo]
   console.log('finalList size:' + finalList.length)
   return finalList
 }
