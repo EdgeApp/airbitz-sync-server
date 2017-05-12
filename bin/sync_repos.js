@@ -40,7 +40,6 @@ const servers = require('/etc/absync/absync.json')
 mainLoop()
 
 function mainLoop () {
-  let doRepoDiffs = true
   let localRepos = getLocalDirs()
   let remoteRepos = getRemoteRepoList()
   let intersectRepos = intersect(localRepos, remoteRepos)
@@ -49,7 +48,7 @@ function mainLoop () {
 
   let numTotalRepos = localRepos.length
 
-  while (doRepoDiffs) {
+  for (let doRepoDiffs = 0; doRepoDiffs < 3; doRepoDiffs++) {
     if (bFirst) {
       bFirst = false
     } else {
@@ -64,7 +63,7 @@ function mainLoop () {
       console.log('Call pushRepoLoop for diffs:' + diff.length)
       pushRepoLoop(diff)
     } else {
-      doRepoDiffs = false
+      doRepoDiffs = 3
     }
   }
   console.log('Call pushRepoLoop for intersection')
