@@ -10,7 +10,6 @@ CURRENT_DIR=$( /bin/pwd )
 #    exit 1
 #fi
 
-ETAG=${1}
 EXPECTED=$( cat ${HOME}/apkhash )
 REMOTE=https://airbitz.co/download
 #REMOTE=https://airbitz.co/download/airbitz-2.3.3-2016112602.apk
