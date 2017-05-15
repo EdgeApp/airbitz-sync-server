@@ -23,7 +23,7 @@ function loopWriteRepoList() {
 
   console.log('loopWriteRepoList: writing repolist.txt')
   fs.writeFileSync(config.userDir + 'repolist.tmp', stdout_string)
-  fs.renameSync(config.userDir + 'repolist.tmp', config.repoListPath + 'repolist.txt')
+  fs.createReadStream(config.userDir + 'repolist.tmp').pipe(fs.createWriteStream(config.repoListPath + 'repolist.txt'));
 
   console.log('loopWriteRepoList: writing repolist.txt SUCCESS')
   setTimeout(() => {
