@@ -79,8 +79,12 @@ function findProc (procObj) {
   for (i in procs) {
     const proc = procs[i]
 
-    if (proc.pid == procObj.pid &&
-        proc.repoName == procObj.repoName) {
+    if (proc.pid != undefined &&
+      procObj.pid != undefined &&
+        proc.repoName != undefined &&
+        procObj.repoName != undefined &&
+      proc.pid == procObj.pid &&
+      proc.repoName == procObj.repoName) {
       return true
     }
   }
