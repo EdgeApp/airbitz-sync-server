@@ -5,3 +5,6 @@ BIN=$HOME/code/airbitz-sync-server/bin
 #0 20 15 * * $BIN/gc_repos.sh 2>&1 1>$HOME/gc_repos.log
 */5 * * * * node $BIN/fix_stuck.js 2>&1 1>$HOME/fix_stuck.log
 
+# Uncomment the lines below for one git server to report stats such as backup.git.airbitz.co
+#0 */4 * * * flock -w 1 $HOME/stats.lock $BIN/report_stats.sh 2>&1 >> $HOME/report_stats.log
+#0,15,30,45 * * * * $BIN/report_hourly.sh 2>&1 >> $HOME/report_hourly.log
