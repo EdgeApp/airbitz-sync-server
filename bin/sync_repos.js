@@ -5,28 +5,7 @@ const rsync = require('rsync')
 
 const std = ["pipe", "inherit", "inherit"]
 
-const LOOP_DELAY_MILLISECONDS = 100
-// var psresult = child_process.execFileSync('ps', ['xau'], { encoding: 'utf8' })
-// const psArray = psresult.split('\n')
-// var numRunning = 0
-// for (var i in psArray) {
-//   if (psArray[i].includes('sync_repos.js')) {
-//     numRunning++
-//   }
-// }
-
-// Check if script is already running
-//
-// sync_repos.js is designed to be run as a cron job using a line such as
-// 0 23 * * * node $HOME/sync_repos.js 2>&1 1>$HOME/sync_repos.log
-// Run this way, two lines containing 'sync_repos.js' will show in the process list
-// therefore we check for >2 to determine if we are already running
-// if (numRunning > 2) {
-//   var date = new Date()
-//   var log = date.toDateString() + ":" + date.toTimeString()
-//   console.log(log + ' sync_repos.js already running. Exiting')
-//   return
-// }
+const LOOP_DELAY_MILLISECONDS = 10
 
 var gdate = new Date()
 var glog = gdate.toDateString() + ":" + gdate.toTimeString()
@@ -71,7 +50,26 @@ function mainLoop () {
 
   setTimeout(() => {
     mainLoop()
-  }, 1000)
+  }, LOOP_DELAY_MILLISECONDS)
+}
+
+function repoListToArray (repolistfile) {
+  const remoteRepoListRaw = fs.readFileSync(repolistfile).toString().split("\n")
+  let remoteRepoList = []
+  let repoLists = []
+
+  for (var m = 0; m < remoteRepoListRaw.length; m++) {
+    const repo = remoteRepoListRaw[m]
+    const file_array = repo.split('/')
+    if (file_array.length > 1) {
+      const file = file_array[file_array.length - 1]
+      remoteRepoList.push(file)
+    }
+  }
+  console.log('    Num repos:' + remoteRepoList.length)
+  repoLists.push(remoteRepoList)
+
+  return repoLists
 }
 
 function getRemoteRepoList () {
@@ -92,19 +90,9 @@ function getRemoteRepoList () {
       console.log('  [rsync failed] ' + userAtServer)
       continue
     }
-    const remoteRepoListRaw = fs.readFileSync(config.userDir + serverFile).toString().split("\n")
-    var remoteRepoList = []
 
-    for (var m = 0; m < remoteRepoListRaw.length; m++) {
-      const repo = remoteRepoListRaw[m]
-      const file_array = repo.split('/')
-      if (file_array.length > 1) {
-        const file = file_array[file_array.length - 1]
-        remoteRepoList.push(file)
-      }
-    }
-    console.log('    Num repos:' + remoteRepoList.length)
-    repoLists.push(remoteRepoList)
+    let arrayRepos = repoListToArray(config.userDir + serverFile)
+    repoLists = repoLists.concat(arrayRepos)
   }
 
   let indexOfSmallestRepo = 0
@@ -143,41 +131,49 @@ function intersect(a, b) {
 
 function getLocalDirs() {
   console.log('ENTER getLocalDirs')
-  const dir = fs.readdirSync(rootDir)
 
-// Add a diff method to arrays
-
+  // If repolist.txt exists, use it. Otherwise, build up the list ourselves
   var allDirs = []
 
-  var run_subset = false
+  const repolistFile = config.repoListPath + 'repolist.txt'
+  const exists = fs.existsSync(repolistFile)
 
-  for (var f = 0; f < dir.length; f++) {
+  if (exists) {
+    console.log('  Found local repolist.txt file')
+    let arrayRepos = repoListToArray(repolistFile)
+    allDirs = allDirs.concat(arrayRepos)
+  } else {
+    console.log('  Finding all local repos')
+    const dir = fs.readdirSync(rootDir)
+    var run_subset = false
 
-    // For testing only look for 'wa...' directories which are testing only
-    if (run_subset && !dir[f].startsWith('ff')) {
-      continue
-    }
+    for (var f = 0; f < dir.length; f++) {
 
-    const path = rootDir + "/" + dir[f]
-    const stat = fs.statSync(path)
-    if (stat.isDirectory()) {
+      // For testing only look for 'wa...' directories which are testing only
+      if (run_subset && !dir[f].startsWith('ff')) {
+        continue
+      }
 
-      const dir2 = fs.readdirSync(path)
-      for (var f2 = 0; f2 < dir2.length; f2++) {
-        // For testing only look for 'wa...' directories which are testing only
-        if (run_subset && !dir2[f2].startsWith('ffff')) {
-          continue
-        }
-        const path2 = path + '/' + dir2[f2]
-        const stat2 = fs.statSync(path2)
-        if (stat2.isDirectory()) {
-          allDirs.push(dir2[f2])
+      const path = rootDir + "/" + dir[f]
+      const stat = fs.statSync(path)
+      if (stat.isDirectory()) {
+
+        const dir2 = fs.readdirSync(path)
+        for (var f2 = 0; f2 < dir2.length; f2++) {
+          // For testing only look for 'wa...' directories which are testing only
+          if (run_subset && !dir2[f2].startsWith('ffff')) {
+            continue
+          }
+          const path2 = path + '/' + dir2[f2]
+          const stat2 = fs.statSync(path2)
+          if (stat2.isDirectory()) {
+            allDirs.push(dir2[f2])
+          }
         }
       }
     }
-    // console.log(dir[f] + ' is ' + stat.isDirectory())
   }
-// console.log(allDirs)
+
   console.log('  num repos:' + allDirs.length)
   return allDirs
 }
