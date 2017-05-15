@@ -11,7 +11,7 @@ CURRENT_DIR=$( /bin/pwd )
 #fi
 
 ETAG=${1}
-EXPECTED=$( cat ${CURRENT_DIR}/apkhash )
+EXPECTED=$( cat ${HOME}/apkhash )
 REMOTE=https://airbitz.co/download
 #REMOTE=https://airbitz.co/download/airbitz-2.3.3-2016112602.apk
 DEST=/tmp/airbitz-android.apk
