@@ -1,6 +1,9 @@
 #!/bin/bash
 
+set -u
 set -e
+
+CURRENT_DIR=$( /bin/pwd )
 
 #if [[ $# -lt 1 ]]; then
 #    echo "$0 <expected-checksum> <optional:etag>"
@@ -8,12 +11,12 @@ set -e
 #fi
 
 ETAG=${1}
-EXPECTED=$( cat apkhash )
+EXPECTED=$( cat ${CURRENT_DIR}/apkhash )
 REMOTE=https://airbitz.co/download
 #REMOTE=https://airbitz.co/download/airbitz-2.3.3-2016112602.apk
 DEST=/tmp/airbitz-android.apk
 
-curl -f -L -s --header "If-None-Match: $ETAG" -o $DEST $REMOTE
+curl -f -L -s -o $DEST $REMOTE
 CHECKSUM=$(shasum -a 256 $DEST | awk '{print $1}')
 if [[ $EXPECTED != $CHECKSUM ]]; then
     date
