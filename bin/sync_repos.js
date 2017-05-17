@@ -56,7 +56,6 @@ function mainLoop () {
 function repoListToArray (repolistfile) {
   const remoteRepoListRaw = fs.readFileSync(repolistfile).toString().split("\n")
   let remoteRepoList = []
-  let repoLists = []
 
   for (var m = 0; m < remoteRepoListRaw.length; m++) {
     const repo = remoteRepoListRaw[m]
@@ -67,9 +66,8 @@ function repoListToArray (repolistfile) {
     }
   }
   console.log('    Num repos:' + remoteRepoList.length)
-  repoLists.push(remoteRepoList)
 
-  return repoLists
+  return remoteRepoList
 }
 
 function getRemoteRepoList () {
