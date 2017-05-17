@@ -23,8 +23,12 @@ function mainLoop () {
   let localRepos = getLocalDirs()
   console.log('remoteRepos:' + remoteRepos.length)
   console.log('localRepos:' + localRepos.length)
-  let intersectRepos = intersect(localRepos, remoteRepos)
+
+  let intersectDiffRepos = arrayDiffIntersect(localRepos, remoteRepos, true)
+  let diff = intersectDiffRepos.diff
+  const intersectRepos = intersectDiffRepos.intersect
   console.log('intersectRepos:' + intersectRepos.length)
+  console.log('diff:' + diff.length)
   let bFirst = true
 
   let numTotalRepos = localRepos.length
@@ -35,11 +39,11 @@ function mainLoop () {
     } else {
       remoteRepos = getRemoteRepoList()
       localRepos = getLocalDirs()
+      // 'diff' are the repos that are not in both the local machine and remote machine
+      // Do those first before anything else
+      diff = arrayDiffIntersect(localRepos, remoteRepos, false)
     }
 
-    // 'diff' are the repos that are not in both the local machine and remote machine
-    // Do those first before anything else
-    const diff = arrayDiff(localRepos, remoteRepos)
     if (diff.length > 0) {
       console.log('Call pushRepoLoop for diffs:' + diff.length)
       pushRepoLoop(diff)
