@@ -14,6 +14,8 @@ const rootDir = config.userDir + config.reposDir
 
 // Spin off the loop that creates the repolist for this machine
 function loopWriteRepoList() {
+  var newdate = new Date()
+  console.log(newdate.toDateString() + ":" + newdate.toTimeString())
   console.log('ENTER loopWriteRepoList')
   const stdout_string = child_process.execFileSync('find', [ rootDir, '-maxdepth', '2', '-mindepth', '2'], {
     // stdio: std,
