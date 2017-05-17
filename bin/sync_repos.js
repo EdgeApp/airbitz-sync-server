@@ -4,6 +4,7 @@ const request = require('sync-request')
 const rsync = require('rsync')
 
 const std = ["pipe", "inherit", "inherit"]
+const std_noerr = ["pipe", "inherit", "ignore"]
 
 const LOOP_DELAY_MILLISECONDS = 10
 
@@ -273,7 +274,7 @@ function pushRepoToServer (repoName, server) {
 
   try {
     child_process.execFileSync('git', [ 'branch', '-D', 'incoming' ], {
-      stdio: std,
+      stdio: std_noerr,
       cwd: localPath,
       killSignal: 'SIGKILL'
     })
@@ -282,7 +283,7 @@ function pushRepoToServer (repoName, server) {
   }
 
   try {
-    child_process.execFileSync('ab-sync', [localPath, serverPath], { timeout: 20000, stdio: std, cwd: localPath, killSignal: 'SIGKILL' })
+    child_process.execFileSync('ab-sync', [localPath, serverPath], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
     console.log('  [ab-sync success]')
   } catch (e) {
     console.log('  [ab-sync failed]')
@@ -290,7 +291,7 @@ function pushRepoToServer (repoName, server) {
   }
 
   try {
-    child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std, cwd: localPath, killSignal: 'SIGKILL' })
+    child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
     console.log('  [git push success]')
   } catch (e) {
     console.log('  [git push failed]')
