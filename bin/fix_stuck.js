@@ -1,3 +1,5 @@
+
+
 const fs = require('fs')
 const cs = require('child_process')
 
@@ -14,18 +16,6 @@ for (var i in psArray) {
   }
 }
 
-// Check if script is already running
-//
-// fix_stuck.js is designed to be run as a cron job using a line such as
-// 0 23 * * * node $HOME/fix_stuck.js 2>&1 1>$HOME/fix_stuck.log
-// Run this way, two lines containing 'fix_stuck.js' will show in the process list
-// therefore we check for >2 to determine if we are already running
-if (numRunning > 2) {
-  console.log('fix_stuck.js already running. Exiting')
-  return
-}
-
-
 myMain()
 
 function myMain () {
@@ -38,13 +28,21 @@ function myMain () {
 
   for (i in psArray) {
     const procLine = psArray[i]
-    if (procLine.includes('git') && procLine.includes('sync.airbitz.co')) {
+
+    let procType = null
+    if (procLine.includes('git')) {
+      procType = 'git'
+    }
+    if (procLine.includes('ab-sync')) {
+      procType = 'ab-sync'
+    }
+    if ((procType != null ) && procLine.includes('sync.airbitz.co')) {
       // const regEx = /bitz\s(\d*) (.*)sync\.airbitz\.co\/repos\/(.*) master/g
       const regEx = /bitz\s*(\d*) (.*)sync\.airbitz\.co\/repos\/(.*) /g
       const arr = regEx.exec(procLine)
 
       if (arr != null && arr.length > 0) {
-        var procObj = {pid: arr[1], repoName: arr[3]}
+        var procObj = {pid: arr[1], repoName: arr[3], procType}
         if (!findProc(procObj)) {
           newProcs.push(procObj)
           console.log('Adding proc')
