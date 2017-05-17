@@ -21,6 +21,8 @@ mainLoop()
 function mainLoop () {
   let remoteRepos = getRemoteRepoList()
   let localRepos = getLocalDirs()
+  console.log('remoteRepos:' + remoteRepos.length)
+  console.log('localRepos:' + localRepos.length)
   let intersectRepos = intersect(localRepos, remoteRepos)
   console.log('intersectRepos:' + intersectRepos.length)
   let bFirst = true
@@ -90,20 +92,24 @@ function getRemoteRepoList () {
     }
 
     let arrayRepos = repoListToArray(config.userDir + serverFile)
-    repoLists = repoLists.concat(arrayRepos)
+    repoLists.push(arrayRepos)
   }
 
   let indexOfSmallestRepo = 0
   let sizeOfSmallestRepo = 999999999
+  console.log('  repoLists.length:' + repoLists.length)
   for (var n = 0; n < repoLists.length; n++) {
+    console.log('  repoLists[' + n + '].length:' + repoLists[n].length)
     if (repoLists[n].length < sizeOfSmallestRepo) {
       indexOfSmallestRepo = n
       sizeOfSmallestRepo = repoLists[n].length
+      console.log('  indexOfSmallestRepo:' + indexOfSmallestRepo)
+      console.log('  sizeOfSmallestRepo:' + sizeOfSmallestRepo)
     }
     // finalList = [...new Set([...finalList, ...repoLists[n]])]
   }
   const finalList = repoLists[indexOfSmallestRepo]
-  console.log('finalList size:' + finalList.length)
+  console.log('  finalList size:' + finalList.length)
   return finalList
 }
 
