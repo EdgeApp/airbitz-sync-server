@@ -33,6 +33,7 @@ function mainLoop () {
   let bFirst = true
 
   let numTotalRepos = localRepos.length
+  let failedRepos = []
 
   for (let doRepoDiffs = 0; doRepoDiffs < 3; doRepoDiffs++) {
     if (bFirst) {
@@ -47,13 +48,17 @@ function mainLoop () {
 
     if (diff.length > 0) {
       console.log('Call pushRepoLoop for diffs:' + diff.length)
-      pushRepoLoop(diff)
+      failedRepos = pushRepoLoop(diff)
+      console.log('*** Failed Repos from diffs ***')
+      console.log(failedRepos)
     } else {
       doRepoDiffs = 3
     }
   }
   console.log('Call pushRepoLoop for intersection')
-  pushRepoLoop(intersectRepos)
+  failedRepos = pushRepoLoop(intersectRepos)
+  console.log('*** Failed Repos from intersection ***')
+  console.log(failedRepos)
 
   setTimeout(() => {
     mainLoop()
@@ -248,20 +253,30 @@ function getRandomInt(min, max) {
 function pushRepoLoop (dirs) {
 
   const numDirs = dirs.length
+  let failedRepos = []
 
   while (dirs.length) {
     const completed = (numDirs - dirs.length)
-    console.log('pushRepoLoop ' + completed + " of " + numDirs)
+    console.log('pushRepoLoop ' + completed + " of " + numDirs + " failed:" + failedRepos.length)
     const index = getRandomInt(0, dirs.length - 1)
-    pushRepo(dirs[index])
+    const retval = pushRepo(dirs[index])
+    if (!retval) {
+      failedRepos.push(dirs[index])
+    }
     dirs.splice(index, 1)
   }
+  return failedRepos
 }
 
 function pushRepo (repo) {
+  let retval = true
   for (server in servers) {
-    pushRepoToServer(repo, servers[server])
+    let retval2 = pushRepoToServer(repo, servers[server])
+    if (!retval2) {
+      retval = false
+    }
   }
+  return retval
 }
 
 function pushRepoToServer (repoName, server) {
@@ -295,7 +310,9 @@ function pushRepoToServer (repoName, server) {
     console.log('  [git push success]')
   } catch (e) {
     console.log('  [git push failed]')
+    return false
   }
+  return true
 }
 
 function request_repo_create(server, name) {
