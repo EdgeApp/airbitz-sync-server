@@ -117,24 +117,76 @@ function getRemoteRepoList () {
   return finalList
 }
 
-function arrayDiff(a, b) {
-  return a.filter(function(i) {return b.indexOf(i) < 0})
+
+function dateString() {
+  var date = new Date()
+  return date.toDateString() + ":" + date.toTimeString()
+
 }
 
-function intersect(a, b) {
+// const a = ['a', 'b', 'f', 'c1', 'd', 'e']
+// const b = ['a', 'z', 'b', 'c1', 'd', 'zh']
+//
+// console.log(arrayDiffIntersect(a,b,true))
+
+function hashCode(string){
+  var hash = 0;
+  if (string.length == 0) return hash;
+  for (i = 0; i < string.length; i++) {
+    let char = string.charCodeAt(i);
+    hash = ((hash<<5)-hash)+char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+// Returns a diff and/or intersection of two arrays of strings
+// Diff only returns the items in a that are not in b
+function arrayDiffIntersect(a, b, bDoIntersect=false) {
   const alen = a.length
   const blen = b.length
 
-  if (blen > alen) {
-    return b.filter(function (e) {
-      return a.indexOf(e) > -1
-    })
-  } else {
-    return a.filter(function (e) {
-      return b.indexOf(e) > -1
-    })
+  let ahash = []
+  let bhash = []
+
+  // Make hash table of arrays for fast comparison
+  console.log('Making hashes')
+  for (let n = 0; n < alen; n++) {
+    ahash[n]  = hashCode(a[n])
+  }
+  for (let n = 0; n < blen; n++) {
+    code = hashCode(b[n])
+    bhash[code] = true
+  }
+  console.log('Done with hashes')
+
+  let diff = []
+  let intersect = []
+  let iter = 0
+
+  for (let n = 0; n < alen; n++) {
+
+    let match = false
+
+    let ahashcode  = ahash[n]
+
+    if (bhash[ahashcode] != undefined && bhash[ahashcode] == true) {
+      match = true
+      if (bDoIntersect) {
+        intersect.push(a[n])
+      }
+    }
+
+    if (!match) {
+      diff.push(a[n])
+    }
   }
 
+  if (bDoIntersect) {
+    return {diff, intersect}
+  } else {
+    return diff
+  }
 }
 
 function getLocalDirs() {
