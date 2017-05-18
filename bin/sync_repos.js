@@ -49,6 +49,8 @@ function mainLoop () {
     if (diff.length > 0) {
       console.log('Call pushRepoLoop for diffs:' + diff.length)
       failedRepos = pushRepoLoop(diff)
+      console.log('Retrying failed repos from diffs')
+      failedRepos = pushRepoLoop(failedRepos)
       console.log('*** Failed Repos from diffs ***')
       console.log(failedRepos)
     } else {
@@ -57,6 +59,8 @@ function mainLoop () {
   }
   console.log('Call pushRepoLoop for intersection')
   failedRepos = pushRepoLoop(intersectRepos)
+  console.log('Retrying failed repos from intersection')
+  failedRepos = pushRepoLoop(failedRepos)
   console.log('*** Failed Repos from intersection ***')
   console.log(failedRepos)
 
