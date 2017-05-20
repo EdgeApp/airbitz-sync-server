@@ -19,12 +19,12 @@ function dateString() {
   return date.toDateString() + ":" + date.toTimeString()
 }
 
-
-let localRepos = getLocalDirs()
-
-mainLoop(localRepos)
+mainLoop([])
 
 function mainLoop (repos) {
+  if (repos.length == 0) {
+    repos = getLocalDirs()
+  }
 
   console.log('repos size:' + repos.length)
   const index = getRandomInt(0, repos.length - 1)
