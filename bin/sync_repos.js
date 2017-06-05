@@ -309,12 +309,23 @@ function pushRepoToServer (repoName, server) {
     request_repo_create(server, repoName)
   }
 
+
   try {
-    child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
-    console.log('  [git push success]')
+    const r = child_process.execFileSync('find', ['objects', '-type', 'f'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+
+    if (r > 0) {
+      try {
+        child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+        console.log('  [git push success]')
+      } catch (e) {
+        console.log('  [git push failed]')
+        return false
+      }
+    } else {
+      console.log('  [git push unneeded. Empty repo]')
+    }
   } catch (e) {
-    console.log('  [git push failed]')
-    return false
+      console.log('  [git push unneeded. Empty repo (exc)]')
   }
   return true
 }
