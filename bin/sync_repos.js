@@ -271,7 +271,7 @@ function pushRepoLoop (dirs) {
 
   while (dirs.length) {
     const completed = (numDirs - dirs.length)
-    console.log('pushRepoLoop ' + completed + " of " + numDirs + " failed:" + failedRepos.length)
+    console.log('pushRepoLoop ' + completed + " of " + numDirs + " failed:" + failedRepos.length + " empty:" + emptyRepos.length)
     const index = getRandomInt(0, dirs.length - 1)
     const retval = pushRepo(dirs[index])
     if (retval == REPO_PUSH_FAIL) {
