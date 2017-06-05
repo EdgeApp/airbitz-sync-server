@@ -7,6 +7,9 @@ const std = ["pipe", "inherit", "inherit"]
 const std_noerr = ["pipe", "inherit", "ignore"]
 
 const LOOP_DELAY_MILLISECONDS = 10
+const REPO_PUSH_FAIL = 0
+const REPO_PUSH_SUCCESS = 1
+const REPO_PUSH_EMPTY = 2
 
 var gdate = new Date()
 var glog = gdate.toDateString() + ":" + gdate.toTimeString()
@@ -33,7 +36,7 @@ function mainLoop () {
   let bFirst = true
 
   let numTotalRepos = localRepos.length
-  let failedRepos = []
+  let resultRepos = []
 
   for (let doRepoDiffs = 0; doRepoDiffs < 3; doRepoDiffs++) {
     if (bFirst) {
@@ -48,21 +51,27 @@ function mainLoop () {
 
     if (diff.length > 0) {
       console.log('Call pushRepoLoop for diffs:' + diff.length)
-      failedRepos = pushRepoLoop(diff)
+      resultRepos = pushRepoLoop(diff)
+      console.log('*** Empty Repos from diffs ***')
+      console.log(resultRepos.emptyRepos)
+
       console.log('Retrying failed repos from diffs')
-      failedRepos = pushRepoLoop(failedRepos)
+      resultRepos = pushRepoLoop(resultRepos.failedRepos)
       console.log('*** Failed Repos from diffs ***')
-      console.log(failedRepos)
+      console.log(resultRepos.failedRepos)
     } else {
       doRepoDiffs = 3
     }
   }
   console.log('Call pushRepoLoop for intersection')
-  failedRepos = pushRepoLoop(intersectRepos)
+  resultRepos = pushRepoLoop(intersectRepos)
+  console.log('*** Empty Repos from intersection ***')
+  console.log(resultRepos.emptyRepos)
+
   console.log('Retrying failed repos from intersection')
-  failedRepos = pushRepoLoop(failedRepos)
+  resultRepos = pushRepoLoop(resultRepos.failedRepos)
   console.log('*** Failed Repos from intersection ***')
-  console.log(failedRepos)
+  console.log(resultRepos.failedRepos)
 
   setTimeout(() => {
     mainLoop()
@@ -258,26 +267,29 @@ function pushRepoLoop (dirs) {
 
   const numDirs = dirs.length
   let failedRepos = []
+  let emptyRepos = []
 
   while (dirs.length) {
     const completed = (numDirs - dirs.length)
     console.log('pushRepoLoop ' + completed + " of " + numDirs + " failed:" + failedRepos.length)
     const index = getRandomInt(0, dirs.length - 1)
     const retval = pushRepo(dirs[index])
-    if (!retval) {
+    if (retval == REPO_PUSH_FAIL) {
       failedRepos.push(dirs[index])
+    } else if (retval == REPO_PUSH_EMPTY) {
+      emptyRepos.push(dirs[index])
     }
     dirs.splice(index, 1)
   }
-  return failedRepos
+  return { failedRepos, emptyRepos }
 }
 
 function pushRepo (repo) {
-  let retval = true
+  let retval = REPO_PUSH_SUCCESS
   for (server in servers) {
     let retval2 = pushRepoToServer(repo, servers[server])
-    if (!retval2) {
-      retval = false
+    if (retval2 != REPO_PUSH_SUCCESS) {
+      retval = retval2
     }
   }
   return retval
