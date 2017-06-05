@@ -19,50 +19,116 @@ const servers = require('/etc/absync/absync.json')
 
 mainLoop()
 
+// Mainloop iterates over the various servers
 function mainLoop () {
-  let remoteRepos = getRemoteRepoList()
+
   let localRepos = getLocalDirs()
-  console.log('remoteRepos:' + remoteRepos.length)
   console.log('localRepos:' + localRepos.length)
-
-  let intersectDiffRepos = arrayDiffIntersect(localRepos, remoteRepos, true)
-  let diff = intersectDiffRepos.diff
-  const intersectRepos = intersectDiffRepos.intersect
-  console.log('intersectRepos:' + intersectRepos.length)
-  console.log('diff:' + diff.length)
-  let bFirst = true
-
-  let numTotalRepos = localRepos.length
   let failedRepos = []
+  let allFailedRepos = []
 
+  // Sync the diffs between each server
   for (let doRepoDiffs = 0; doRepoDiffs < 3; doRepoDiffs++) {
-    if (bFirst) {
-      bFirst = false
-    } else {
-      remoteRepos = getRemoteRepoList()
-      localRepos = getLocalDirs()
-      // 'diff' are the repos that are not in both the local machine and remote machine
-      // Do those first before anything else
-      diff = arrayDiffIntersect(localRepos, remoteRepos, false)
-    }
 
-    if (diff.length > 0) {
-      console.log('Call pushRepoLoop for diffs:' + diff.length)
-      failedRepos = pushRepoLoop(diff)
+    for (const s in servers) {
+      const server = servers[s]
+      let remoteRepos = getRemoteRepoList(server)
+      let intersectDiffRepos = arrayDiffIntersect(localRepos, remoteRepos, true)
+      let diffLocal = intersectDiffRepos.diff
+      const intersectRepos = intersectDiffRepos.intersect
+      console.log('diffLocal:' + diffLocal.length)
+      console.log('intersectRepos:' + intersectRepos.length)
+      let diffRemote = arrayDiffIntersect(remoteRepos, localRepos)
+      console.log('diffRemote:' + diffRemote.length)
+
+      if (diffLocal.length == 0 && diffRemote.length == 0) {
+        console.log('No diffs to sync')
+        break
+      }
+      if (diffRemote.length > 0) {
+        console.log('Call syncReposLoop for diffRemote:' + diffRemote.length)
+        failedRepos = syncReposLoop(diffRemote, server)
+        allFailedRepos = allFailedRepos.concat(failedRepos)
+      }
+
+      if (diffLocal.length > 0) {
+        console.log('Call syncReposLoop for diffLocal:' + diffLocal.length)
+        failedRepos = syncReposLoop(diffLocal, server)
+        allFailedRepos = allFailedRepos.concat(failedRepos)
+      }
+
       console.log('Retrying failed repos from diffs')
-      failedRepos = pushRepoLoop(failedRepos)
-      console.log('*** Failed Repos from diffs ***')
+      failedRepos = syncReposLoop(allFailedRepos)
+
+      console.log(dateString() + ': *** Failed Repos from diffs ***')
       console.log(failedRepos)
-    } else {
-      doRepoDiffs = 3
+      console.log('*** Failed Repos from diffs ***')
     }
   }
-  console.log('Call pushRepoLoop for intersection')
-  failedRepos = pushRepoLoop(intersectRepos)
-  console.log('Retrying failed repos from intersection')
-  failedRepos = pushRepoLoop(failedRepos)
-  console.log('*** Failed Repos from intersection ***')
-  console.log(failedRepos)
+
+  // Sync the intersection of each server (this is SLOW!)
+  for (const s in servers) {
+    const server = servers[ s ]
+    let intersectDiffRepos = []
+
+    let remoteRepos = getRemoteRepoList(server)
+    intersectDiffRepos = arrayDiffIntersect(localRepos, remoteRepos, true)
+    const intersectRepos = intersectDiffRepos.intersect
+
+    console.log('Call syncReposLoop for intersection')
+    failedRepos = syncReposLoop(intersectRepos, server)
+
+    console.log('Retrying failed repos from intersection')
+    failedRepos = syncReposLoop(failedRepos)
+    console.log(dateString() + ': *** Failed Repos from intersection ***')
+    console.log(failedRepos)
+    console.log('*** Failed Repos from intersection ***')
+  }
+
+    // let bFirst = true
+  //
+  // let numTotalRepos = localRepos.length
+  //
+  // for (let doRepoDiffs = 0; doRepoDiffs < 3; doRepoDiffs++) {
+  //   if (bFirst) {
+  //     bFirst = false
+  //   } else {
+  //     remoteRepos = getRemoteRepoList()
+  //     localRepos = getLocalDirs()
+  //     // 'diff' are the repos that are not in both the local machine and remote machine
+  //     // Do those first before anything else
+  //     diffLocal = arrayDiffIntersect(localRepos, remoteRepos, false)
+  //     diffRemote = arrayDiffIntersect(remoteRepos, localRepos)
+  //   }
+  //
+  //   if (diffLocal.length > 0) {
+  //     console.log('Call syncReposLoop for diffLocal:' + diffLocal.length)
+  //     failedRepos = syncReposLoop(diffLocal)
+  //     console.log('Retrying failed repos from diffLocal')
+  //     failedRepos = syncReposLoop(failedRepos)
+  //     console.log('*** Failed Repos from diffLocal ***')
+  //     console.log(failedRepos)
+  //   }
+  //
+  //   if (diffRemote.length > 0) {
+  //     console.log('Call syncReposLoop for diffRemote:' + diffRemote.length)
+  //     failedRepos = syncReposLoop(diffRemote)
+  //     console.log('Retrying failed repos from diffRemote')
+  //     failedRepos = syncReposLoop(failedRepos)
+  //     console.log('*** Failed Repos from diffRemote ***')
+  //     console.log(failedRepos)
+  //   }
+  //
+  //   if (diffLocal.length == 0 && diffRemote.length == 0) {
+  //     doRepoDiffs = 3
+  //   }
+  // }
+  // console.log('Call syncReposLoop for intersection')
+  // failedRepos = syncReposLoop(intersectRepos)
+  // console.log('Retrying failed repos from intersection')
+  // failedRepos = syncReposLoop(failedRepos)
+  // console.log('*** Failed Repos from intersection ***')
+  // console.log(failedRepos)
 
   setTimeout(() => {
     mainLoop()
@@ -81,50 +147,29 @@ function repoListToArray (repolistfile) {
       remoteRepoList.push(file)
     }
   }
-  console.log('    Num repos:' + remoteRepoList.length)
+  // console.log('    Num repos:' + remoteRepoList.length)
 
   return remoteRepoList
 }
 
-function getRemoteRepoList () {
-  console.log('ENTER getRemoteRepoList')
-  let repoLists = []
-  for (let n = 0; n < servers.length; n++) {
-    // Rsync the remote file list from remote server
-    const userAtServer = 'readuser@' + servers[n] + ":repolist.txt"
-    const serverFile = 'repos-' + servers[n] + '.txt'
-    try {
-      child_process.execFileSync('rsync', [ userAtServer, config.userDir + serverFile ], {
-        stdio: std,
-        cwd: config.userDir,
-        killSignal: 'SIGKILL'
-      })
-      console.log('  [rsync success] ' + userAtServer)
-    } catch (e) {
-      console.log('  [rsync failed] ' + userAtServer)
-      continue
-    }
-
-    let arrayRepos = repoListToArray(config.userDir + serverFile)
-    repoLists.push(arrayRepos)
+function getRemoteRepoList (server) {
+  console.log('ENTER getRemoteRepoList: ' + server)
+  const userAtServer = 'readuser@' + server + ":repolist.txt"
+  const serverFile = 'repos-' + server + '.txt'
+  try {
+    child_process.execFileSync('rsync', [ userAtServer, config.userDir + serverFile ], {
+      stdio: std,
+      cwd: config.userDir,
+      killSignal: 'SIGKILL'
+    })
+    console.log('  [rsync success] ' + userAtServer)
+  } catch (e) {
+    console.log('  [rsync failed] ' + userAtServer)
   }
 
-  let indexOfSmallestRepo = 0
-  let sizeOfSmallestRepo = 999999999
-  console.log('  repoLists.length:' + repoLists.length)
-  for (var n = 0; n < repoLists.length; n++) {
-    console.log('  repoLists[' + n + '].length:' + repoLists[n].length)
-    if (repoLists[n].length < sizeOfSmallestRepo) {
-      indexOfSmallestRepo = n
-      sizeOfSmallestRepo = repoLists[n].length
-      console.log('  indexOfSmallestRepo:' + indexOfSmallestRepo)
-      console.log('  sizeOfSmallestRepo:' + sizeOfSmallestRepo)
-    }
-    // finalList = [...new Set([...finalList, ...repoLists[n]])]
-  }
-  const finalList = repoLists[indexOfSmallestRepo]
-  console.log('  finalList size:' + finalList.length)
-  return finalList
+  const remoteRepos = repoListToArray(config.userDir + serverFile)
+  console.log('  remoteRepos size:' + remoteRepos.length)
+  return remoteRepos
 }
 
 
@@ -254,16 +299,16 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function pushRepoLoop (dirs) {
+function syncReposLoop (dirs, server) {
 
   const numDirs = dirs.length
   let failedRepos = []
 
   while (dirs.length) {
     const completed = (numDirs - dirs.length)
-    console.log('pushRepoLoop ' + completed + " of " + numDirs + " failed:" + failedRepos.length)
+    console.log('syncReposLoop ' + completed + " of " + numDirs + " failed:" + failedRepos.length)
     const index = getRandomInt(0, dirs.length - 1)
-    const retval = pushRepo(dirs[index])
+    const retval = syncRepoWithServer(dirs[index], server)
     if (!retval) {
       failedRepos.push(dirs[index])
     }
@@ -271,25 +316,43 @@ function pushRepoLoop (dirs) {
   }
   return failedRepos
 }
+//
+// function pushRepo (repo) {
+//   let retval = true
+//   for (server in servers) {
+//     let retval2 = syncRepoWithServer(repo, servers[server])
+//     if (!retval2) {
+//       retval = false
+//     }
+//   }
+//   return retval
+// }
 
-function pushRepo (repo) {
-  let retval = true
-  for (server in servers) {
-    let retval2 = pushRepoToServer(repo, servers[server])
-    if (!retval2) {
-      retval = false
-    }
-  }
-  return retval
-}
-
-function pushRepoToServer (repoName, server) {
+function syncRepoWithServer (repoName, server) {
   var date = new Date()
   const localPath = rootDir + '/' + repoName.substring(0,2) + '/' + repoName
   var log = date.toDateString() + ":" + date.toTimeString()
-  log += " pushRepoToServer:" + server + " " + repoName
+  log += " syncRepoWithServer:" + server + " " + repoName
   console.log(log)
   const serverPath = config.serverPrefix + server + "/repos/" + repoName
+
+  return true
+
+  // If local directory doesn't exist, create it
+  const exists = fs.existsSync(localPath)
+  if (!exists) {
+    console.log('  [No local repo]')
+    try {
+      // child_process.execFileSync('create_ab_repo.sh', [ rootDir, repoName ], {
+        stdio: std_noerr,
+        cwd: localPath,
+        killSignal: 'SIGKILL'
+      })
+      console.log('  [create_ab_repo success]')
+    } catch (e) {
+      console.log('  [create_ab_repo failed]')
+    }
+  }
 
   try {
     child_process.execFileSync('git', [ 'branch', '-D', 'incoming' ], {
@@ -302,7 +365,7 @@ function pushRepoToServer (repoName, server) {
   }
 
   try {
-    child_process.execFileSync('ab-sync', [localPath, serverPath], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+    // child_process.execFileSync('ab-sync', [localPath, serverPath], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
     console.log('  [ab-sync success]')
   } catch (e) {
     console.log('  [ab-sync failed]')
@@ -310,11 +373,21 @@ function pushRepoToServer (repoName, server) {
   }
 
   try {
-    child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
-    console.log('  [git push success]')
+    const r = child_process.execFileSync('find', ['objects', '-type', 'f'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+
+    if (r > 0) {
+      try {
+        // child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+        console.log('  [git push success]')
+      } catch (e) {
+        console.log('  [git push failed]')
+        return false
+      }
+    } else {
+      console.log('  [git push unneeded. Empty repo]')
+    }
   } catch (e) {
-    console.log('  [git push failed]')
-    return false
+      console.log('  [git push unneeded. Empty repo (exc)]')
   }
   return true
 }
@@ -324,7 +397,7 @@ function request_repo_create(server, name) {
   var data = {json: {"repo_name": name}}
 
   try {
-    res = request('POST', url, {json: {"repo_name": name}})
+    // res = request('POST', url, {json: {"repo_name": name}})
     console.log('  [remote repo created]')
     return true
   } catch (e) {
