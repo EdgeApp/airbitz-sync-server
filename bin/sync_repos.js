@@ -313,7 +313,7 @@ function pushRepoToServer (repoName, server) {
   try {
     const r = child_process.execFileSync('find', ['objects', '-type', 'f'], { timeout: 20000, cwd: localPath, killSignal: 'SIGKILL' })
 
-    if (r > 0) {
+    if (r.length > 0) {
       try {
         child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
         console.log('  [git push success]')
