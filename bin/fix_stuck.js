@@ -36,9 +36,9 @@ function myMain () {
     if (procLine.includes('ab-sync')) {
       procType = 'ab-sync'
     }
-    if ((procType != null ) && procLine.includes('sync.airbitz.co')) {
+    if ((procType != null ) && procLine.includes('.airbitz.co')) {
       // const regEx = /bitz\s(\d*) (.*)sync\.airbitz\.co\/repos\/(.*) master/g
-      const regEx = /bitz\s*(\d*) (.*)sync\.airbitz\.co\/repos\/(.*) /g
+      const regEx = /bitz\s*(\d*) (.*)\.airbitz\.co\/repos\/(.*) /g
       const arr = regEx.exec(procLine)
 
       if (arr != null && arr.length > 0) {
