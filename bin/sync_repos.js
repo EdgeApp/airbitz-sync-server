@@ -6,10 +6,12 @@ const rsync = require('rsync')
 const std = ["pipe", "inherit", "inherit"]
 const std_noerr = ["pipe", "inherit", "ignore"]
 
-const LOOP_DELAY_MILLISECONDS = 10
+const MAIN_LOOP_DELAY_MILLISECONDS = 1000
+const INNER_LOOP_DELAY_MILLISECONDS = 3000
 const REPO_PUSH_FAIL = 0
 const REPO_PUSH_SUCCESS = 1
 const REPO_PUSH_EMPTY = 2
+const FAKE_IT = true
 
 var gdate = new Date()
 var glog = gdate.toDateString() + ":" + gdate.toTimeString()
@@ -20,9 +22,10 @@ const rootDir = config.userDir + config.reposDir
 // const rootDir = '/home/bitz/www/repos'
 const servers = require('/etc/absync/absync.json')
 
-mainLoop()
+const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-function mainLoop () {
+async function mainLoop () {
+
   let remoteRepos = getRemoteRepoList()
   let localRepos = getLocalDirs()
   console.log('remoteRepos:' + remoteRepos.length)
@@ -51,32 +54,34 @@ function mainLoop () {
 
     if (diff.length > 0) {
       console.log('Call pushRepoLoop for diffs:' + diff.length)
-      resultRepos = pushRepoLoop(diff)
+      resultRepos = await pushRepoLoop(diff)
       console.log('*** Empty Repos from diffs ***')
       console.log(resultRepos.emptyRepos)
 
       console.log('Retrying failed repos from diffs')
-      resultRepos = pushRepoLoop(resultRepos.failedRepos)
+      resultRepos = await pushRepoLoop(resultRepos.failedRepos)
       console.log('*** Failed Repos from diffs ***')
       console.log(resultRepos.failedRepos)
     } else {
       doRepoDiffs = 3
     }
   }
-  console.log('Call pushRepoLoop for intersection')
-  resultRepos = pushRepoLoop(intersectRepos)
+  console.log('Call pushRepoLoop for intersection of 10,000 repos')
+  const subArray = intersectRepos.slice(0, 9999)
+  resultRepos = await pushRepoLoop(subArray, INNER_LOOP_DELAY_MILLISECONDS)
   console.log('*** Empty Repos from intersection ***')
   console.log(resultRepos.emptyRepos)
 
   console.log('Retrying failed repos from intersection')
-  resultRepos = pushRepoLoop(resultRepos.failedRepos)
+  resultRepos = await pushRepoLoop(resultRepos.failedRepos, INNER_LOOP_DELAY_MILLISECONDS)
   console.log('*** Failed Repos from intersection ***')
   console.log(resultRepos.failedRepos)
 
-  setTimeout(() => {
-    mainLoop()
-  }, LOOP_DELAY_MILLISECONDS)
+  await snooze(MAIN_LOOP_DELAY_MILLISECONDS)
+  mainLoop()
 }
+
+mainLoop()
 
 function repoListToArray (repolistfile) {
   const remoteRepoListRaw = fs.readFileSync(repolistfile).toString().split("\n")
@@ -263,7 +268,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function pushRepoLoop (dirs) {
+async function pushRepoLoop (dirs, waitms=0) {
 
   const numDirs = dirs.length
   let failedRepos = []
@@ -280,6 +285,7 @@ function pushRepoLoop (dirs) {
       emptyRepos.push(dirs[index])
     }
     dirs.splice(index, 1)
+    await snooze(waitms)
   }
   return { failedRepos, emptyRepos }
 }
@@ -314,8 +320,12 @@ function pushRepoToServer (repoName, server) {
   }
 
   try {
-    child_process.execFileSync('ab-sync', [localPath, serverPath], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
-    console.log('  [ab-sync success]')
+    if (FAKE_IT) {
+      console.log('  [ab-sync faked]' + localPath + " " + serverPath)
+    } else {
+      child_process.execFileSync('ab-sync', [localPath, serverPath], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+      console.log('  [ab-sync success]')
+    }
   } catch (e) {
     console.log('  [ab-sync failed]')
     request_repo_create(server, repoName)
@@ -326,8 +336,12 @@ function pushRepoToServer (repoName, server) {
 
     if (r.length > 0) {
       try {
-        child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
-        console.log('  [git push success]')
+        if (FAKE_IT) {
+          console.log('  [git push faked] ' + serverPath)
+        } else {
+          child_process.execFileSync('git', ['push', serverPath, 'master'], { timeout: 20000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
+          console.log('  [git push success]')
+        }
       } catch (e) {
         console.log('  [git push failed]')
         return REPO_PUSH_FAIL
@@ -348,8 +362,12 @@ function request_repo_create(server, name) {
   var data = {json: {"repo_name": name}}
 
   try {
-    res = request('POST', url, {json: {"repo_name": name}})
-    console.log('  [remote repo created]')
+    if (FAKE_IT) {
+      console.log('  [remote repo creation faked]' + name)
+    } else {
+      res = request('POST', url, {json: {"repo_name": name}})
+      console.log('  [remote repo created]')
+    }
     return true
   } catch (e) {
     console.log('  [remote repo create failed]')
