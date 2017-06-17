@@ -11,7 +11,7 @@ const INNER_LOOP_DELAY_MILLISECONDS = 3000
 const REPO_PUSH_FAIL = 0
 const REPO_PUSH_SUCCESS = 1
 const REPO_PUSH_EMPTY = 2
-const FAKE_IT = true
+const FAKE_IT = false
 
 var gdate = new Date()
 var glog = gdate.toDateString() + ":" + gdate.toTimeString()
