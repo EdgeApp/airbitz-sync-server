@@ -1,53 +1,13 @@
-#!/usr/bin/env python
+#!/bin/sh
 
-import os
-import subprocess
+GITCMD="/usr/bin/git"
 
-basename = os.path.basename(os.getcwd())
-subprocess.call(["curl", "http://localhost:8000/api/v1/repo/sync/{0}".format(basename)], stdout=False, stderr=False)
+chash=$($GITCMD rev-parse HEAD)
+repo=${PWD##*/}
 
-# import ConfigParser
-# import os
-# import subprocess
-# import sys
-#
-# def get_servers():
-#     config = ConfigParser.ConfigParser()
-#     config.read('/etc/absync/absync.conf')
-#     return config.get('Servers', 'servers').split(",")
-#
-# def create_repo_url(url):
-#     import urlparse
-#     s = urlparse.urlsplit(url)
-#     return s.scheme + '://' + s.netloc + '/api/v1/repo/create/'
-#
-# def request_repo(url, name):
-#     import json, urllib2
-#     data = json.dumps({"repo_name": name})
-#     req = urllib2.Request(create_repo_url(url), data, {'Content-Type': 'application/json'})
-#     try:
-#         s = urllib2.urlopen(req, timeout=1)
-#         return s.getcode() in (200, 201)
-#     except:
-#         return False
-#
-# SERVERS = get_servers();
-# basename = os.path.basename(os.getcwd())
-#
-# # Sync master branches across other servers
-# for server in SERVERS:
-#     path = "{0}/{1}".format(server, basename)
-#     subprocess.call(["git", "branch", "-D", "incoming"], stdout=False, stderr=False)
-#     if subprocess.call(["ab-sync", ".", path], stdout=False, stderr=False) > 0:
-#         if path.find('://') > 0:
-#             success = request_repo(server, basename)
-#         else:
-#             subprocess.call(["mkdir", "-p", path], stdout=False, stderr=False)
-#             success = subprocess.call(["git", "init", "--bare", path]) == 0
-#         subprocess.call(["git", "push", path, "master"])
-#
-# # newpath="/home/bitz/www/repos/{0}/{1}/".format(basename[:2], basename)
-# # print newpath
-# # print os.getcwd()
-# # subprocess.call(["sudo", "-u", "bitz", "rsync", "-az", ".", newpath], stdout=False, stderr=False)
-# # subprocess.call(["sudo", "-u", "bitz", "chown", "bitz:bitz", newpath], stdout=False, stderr=False)
+hname=$(hostname)
+
+node /home/bitz/code/airbitz-sync-server/src/update_hash_cli.js ${hname} ${repo} ${chash}
+
+curl "http://localhost:8000/api/v1/repo/sync/${repo}"
+
