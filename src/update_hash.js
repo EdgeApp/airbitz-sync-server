@@ -15,7 +15,7 @@ async function writeDb (server, repo, hash) {
         } else {
           console.log('  writeDb:' + repo + ' hash:' + hash + ' FAILED')
           console.log(err)
-          reject(err)
+          resolve()
         }
       } else {
         resolve(insertDb(server, repo, hash, response))
@@ -33,7 +33,7 @@ async function insertDb (server, repo, hash, repoObj = {}) {
       if (err) {
         resolve(writeDb(server, repo, hash))
       } else {
-        console.log('  writeDb:' + repo + ' hash:' + hash + ' SUCCESS')
+        // console.log('  writeDb:' + repo + ' hash:' + hash + ' SUCCESS')
         resolve()
       }
     })
