@@ -1,16 +1,23 @@
 {
   "name": "airbitz-sync-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Git server wrapper",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint '*.js' 'src/**/*.js' 'test/**/*.js'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "eslint": "^3.18.0",
+    "eslint-config-standard": "^7.1.0",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.1.1"
+  },
   "dependencies": {
     "forever": "^0.15.3",
+    "nano": "^6.3.0",
     "rsync": "^0.6.1",
     "sync-request": "4.0.1"
   }
