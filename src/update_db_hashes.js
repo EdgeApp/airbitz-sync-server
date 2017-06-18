@@ -31,7 +31,7 @@ async function mainLoop () {
       commit = commit.replace(/(\r\n|\n|\r)/gm, '')
       // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
       // console.log('  [git rev-parse success] ' + commit)
-      await _writeDb(config.serverName, commit, repoName)
+      await _writeDb(config.serverName, repoName, commit)
     } catch (e) {
       console.log('  [writeDb FAILED]')
     }
