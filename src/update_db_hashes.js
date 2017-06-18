@@ -34,9 +34,9 @@ async function mainLoop () {
       // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
       // console.log('  [git rev-parse success] ' + commit)
       await _writeDb(config.serverName, repoName, commit)
-      console.log(sprintf('writeDb SUCCESS %-5s %-41s %-41s', config.serverName, repoName, commit))
+      console.log(sprintf('writeDb %d/%d SUCCESS %-5s %-41s %-41s', n, localRepos.length, config.serverName, repoName, commit))
     } catch (e) {
-      console.log(sprintf('writeDb FAILED  %-5s %-41s %-41s', config.serverName, repoName, commit))
+      console.log(sprintf('writeDb %d/%d FAILED  %-5s %-41s %-41s', n, localRepos.length, config.serverName, repoName, commit))
     }
     // break
   }
