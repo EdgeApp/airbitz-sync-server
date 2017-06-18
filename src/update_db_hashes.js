@@ -31,7 +31,7 @@ async function mainLoop () {
       const commit = childProcess.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, cwd: localPath, killSignal: 'SIGKILL' })
       // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
       console.log('  [git rev-parse success] ' + commit)
-      await writeDb('git1', commit, repoName)
+      await writeDb(config.serverName, commit, repoName)
     } catch (e) {
       console.log('  [git rev-parse FAILED]')
     }
