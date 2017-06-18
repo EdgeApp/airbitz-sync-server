@@ -1,7 +1,7 @@
 const fs = require('fs')
 const childProcess = require('child_process')
-const nano = require('nano')('http://localhost:5984')
 const config = require('/etc/sync_repos.config.json')
+const _writeDb = require('./update_hash.js').writeDb
 
 // const request = require('sync-request')
 // const rsync = require('rsync')
@@ -13,9 +13,8 @@ const LOOP_DELAY_MILLISECONDS = 10000
 console.log(dateString() + ' update_db_hashes.js starting')
 
 const _rootDir = config.userDir + config.reposDir
-const _dbRepos = nano.db.use('db_repos')
 
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
+// const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 mainLoop()
 
@@ -29,18 +28,18 @@ async function mainLoop () {
       const localPath = _rootDir + '/' + repoName.substring(0, 2) + '/' + repoName
       // console.log(localPath)
       let commit = childProcess.execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 3000, cwd: localPath, killSignal: 'SIGKILL' })
-      commit = commit.replace(/(\r\n|\n|\r)/gm,"")
+      commit = commit.replace(/(\r\n|\n|\r)/gm, '')
       // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
       console.log('  [git rev-parse success] ' + commit)
-      await writeDb(config.serverName, commit, repoName)
+      await _writeDb(config.serverName, commit, repoName)
     } catch (e) {
       console.log('  [git rev-parse FAILED]')
     }
     // break
   }
 
-  await snooze(LOOP_DELAY_MILLISECONDS)
-  mainLoop()
+  // await snooze(LOOP_DELAY_MILLISECONDS)
+  // mainLoop()
 //
 //     for (const s in servers) {
 //       const server = servers[s]
@@ -143,40 +142,40 @@ async function mainLoop () {
 //   // console.log(failedRepos)
 }
 
-async function writeDb (server, repo, hash) {
-  console.log('ENTER writeDb:' + repo + ' hash:' + hash)
-  return new Promise((resolve, reject) => {
-    _dbRepos.get(repo, function (err, response) {
-      if (err) {
-        if (err.error === 'not_found') {
-          // Create the db entry
-          resolve(insertDb(server, repo, hash))
-        } else {
-          console.log(err)
-          reject(err)
-        }
-      } else {
-        resolve(insertDb(server, repo, hash, response))
-      }
-    })
-  })
-}
-
-async function insertDb (server, repo, hash, repoObj = {}) {
-  console.log('ENTER insertDB:' + repo + ' hash:' + hash)
-  repoObj[server] = hash
-
-  return new Promise((resolve, reject) => {
-    _dbRepos.insert(repoObj, repo, function (err, res) {
-      if (err) {
-        resolve(writeDb(server, repo, hash))
-      } else {
-        console.log('  Insert ' + repo + ' SUCCESS')
-        resolve()
-      }
-    })
-  })
-}
+// async function writeDb (server, repo, hash) {
+//   console.log('ENTER writeDb:' + repo + ' hash:' + hash)
+//   return new Promise((resolve, reject) => {
+//     _dbRepos.get(repo, function (err, response) {
+//       if (err) {
+//         if (err.error === 'not_found') {
+//           // Create the db entry
+//           resolve(insertDb(server, repo, hash))
+//         } else {
+//           console.log(err)
+//           reject(err)
+//         }
+//       } else {
+//         resolve(insertDb(server, repo, hash, response))
+//       }
+//     })
+//   })
+// }
+//
+// async function insertDb (server, repo, hash, repoObj = {}) {
+//   console.log('ENTER insertDB:' + repo + ' hash:' + hash)
+//   repoObj[server] = hash
+//
+//   return new Promise((resolve, reject) => {
+//     _dbRepos.insert(repoObj, repo, function (err, res) {
+//       if (err) {
+//         resolve(writeDb(server, repo, hash))
+//       } else {
+//         console.log('  Insert ' + repo + ' SUCCESS')
+//         resolve()
+//       }
+//     })
+//   })
+// }
 
 function dateString () {
   const date = new Date()
