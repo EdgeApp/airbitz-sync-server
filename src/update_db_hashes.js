@@ -182,23 +182,22 @@ function dateString () {
   return date.toDateString() + ':' + date.toTimeString()
 }
 
-//
-// function repoListToArray (repolistfile) {
-//   const remoteRepoListRaw = fs.readFileSync(repolistfile).toString().split("\n")
-//   let remoteRepoList = []
-//
-//   for (var m = 0; m < remoteRepoListRaw.length; m++) {
-//     const repo = remoteRepoListRaw[m]
-//     const file_array = repo.split('/')
-//     if (file_array.length > 1) {
-//       const file = file_array[file_array.length - 1]
-//       remoteRepoList.push(file)
-//     }
-//   }
-//   // console.log('    Num repos:' + remoteRepoList.length)
-//
-//   return remoteRepoList
-// }
+function repoListToArray (repolistfile) {
+  const remoteRepoListRaw = fs.readFileSync(repolistfile).toString().split('\n')
+  const remoteRepoList = []
+
+  for (let m = 0; m < remoteRepoListRaw.length; m++) {
+    const repo = remoteRepoListRaw[m]
+    const fileArray = repo.split('/')
+    if (fileArray.length > 1) {
+      const file = fileArray[fileArray.length - 1]
+      remoteRepoList.push(file)
+    }
+  }
+  // console.log('    Num repos:' + remoteRepoList.length)
+
+  return remoteRepoList
+}
 //
 // function getRemoteRepoList (server) {
 //   console.log('ENTER getRemoteRepoList: ' + server)
@@ -291,36 +290,44 @@ function getLocalDirs () {
   console.log('ENTER getLocalDirs')
 
   // If repolist.txt exists, use it. Otherwise, build up the list ourselves
-  const allDirs = []
+  let allDirs = []
 
-  console.log('  Finding all local repos')
-  const dir = fs.readdirSync(_rootDir)
-  const RUN_SUBSET = false
+  const repolistFile = config.repoListPath + 'repolist.txt'
+  const exists = fs.existsSync(repolistFile)
 
-  for (let f = 0; f < dir.length; f++) {
-    // For testing only look for 'wa...' directories which are testing only
-    if (RUN_SUBSET && !dir[ f ].startsWith('ff')) {
-      continue
-    }
+  if (exists) {
+    console.log('  Found local repolist.txt file')
+    const arrayRepos = repoListToArray(repolistFile)
+    allDirs = allDirs.concat(arrayRepos)
+  } else {
+    console.log('  Finding all local repos')
+    const dir = fs.readdirSync(_rootDir)
+    const RUN_SUBSET = false
 
-    const path = _rootDir + '/' + dir[ f ]
-    const stat = fs.statSync(path)
-    if (stat.isDirectory()) {
-      const dir2 = fs.readdirSync(path)
-      for (let f2 = 0; f2 < dir2.length; f2++) {
-        // For testing only look for 'wa...' directories which are testing only
-        if (RUN_SUBSET && !dir2[ f2 ].startsWith('ffff')) {
-          continue
-        }
-        const path2 = path + '/' + dir2[ f2 ]
-        const stat2 = fs.statSync(path2)
-        if (stat2.isDirectory()) {
-          allDirs.push(dir2[ f2 ])
+    for (let f = 0; f < dir.length; f++) {
+      // For testing only look for 'wa...' directories which are testing only
+      if (RUN_SUBSET && !dir[ f ].startsWith('ff')) {
+        continue
+      }
+
+      const path = _rootDir + '/' + dir[ f ]
+      const stat = fs.statSync(path)
+      if (stat.isDirectory()) {
+        const dir2 = fs.readdirSync(path)
+        for (let f2 = 0; f2 < dir2.length; f2++) {
+          // For testing only look for 'wa...' directories which are testing only
+          if (RUN_SUBSET && !dir2[ f2 ].startsWith('ffff')) {
+            continue
+          }
+          const path2 = path + '/' + dir2[ f2 ]
+          const stat2 = fs.statSync(path2)
+          if (stat2.isDirectory()) {
+            allDirs.push(dir2[ f2 ])
+          }
         }
       }
     }
   }
-
   console.log('  num repos:' + allDirs.length)
   return allDirs
 }
