@@ -1,7 +1,7 @@
-// git2
-
-// function deleteme (doc) {
+// function (doc) {
 //   const me = 'git2'
+//   if (typeof doc.servers !== 'undefined')
+//     return
 //   if (typeof doc[me] === 'undefined') {
 //     emit(null, doc)
 //     return

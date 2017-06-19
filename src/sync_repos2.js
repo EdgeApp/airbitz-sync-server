@@ -6,7 +6,7 @@ const nano = require('nano')('http://bitz:pillow_butt_plug@git2.airbitz.co:5984'
 const sprintf = require('sprintf-js').sprintf
 const childProcess = require('child_process')
 const config = require('/etc/sync_repos.config.json')
-const servers = require('/etc/absync/absync.json')
+// const servers = require('/etc/absync/absync.json')
 
 const _getRepoPath = require('./create_repo.js').getRepoPath
 const _createRepo = require('./create_repo.js').createRepo
@@ -19,9 +19,11 @@ console.log(dateString() + '*** sync_repos2.js starting ***')
 
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-const hostname = easyEx(null, 'hostname')
-// const hostname = 'git2.airbitz.co'
+// const hostname = easyEx(null, 'hostname')
+const hostname = 'git2.airbitz.co'
 const hostArray = hostname.split('.')
+
+let servers = []
 let host = hostArray[0]
 host = host.replace(/(\r\n|\n|\r)/gm, '')
 
@@ -44,7 +46,29 @@ async function getRepos () {
   })
 }
 
+async function getServers () {
+  return new Promise((resolve) => {
+    _dbRepos.get('00000000_servers', function (err, response) {
+      if (err) {
+        if (err.error === 'not_found') {
+          // Create the db entry
+          resolve([])
+        } else {
+          resolve([])
+        }
+      } else {
+        if (typeof response.servers !== 'undefined') {
+          resolve(response.servers)
+        } else {
+          resolve([])
+        }
+      }
+    })
+  })
+}
+
 async function asyncMain () {
+  servers = await getServers()
   const doc = await getRepos()
   const array = doc.rows
   let failArray = []
@@ -52,12 +76,15 @@ async function asyncMain () {
   for (const n in array) {
     const diff = array[n]
     console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
+    if (typeof diff.value.servers !== 'undefined') {
+      continue
+    }
 
     for (const s in servers) {
-      if (getServer(host) !== servers[s]) {
+      if (host !== servers[s].name) {
         const ret = await pullRepoFromServer(diff.id, servers[s])
         if (!ret) {
-          failArray.push(servers[s])
+          failArray.push(diff.id)
         }
       }
     }
@@ -72,15 +99,6 @@ async function asyncMain () {
   await asyncMain()
 }
 
-function getServer (prefix) {
-  for (const n in servers) {
-    if (servers[n].lastIndexOf(prefix + '.', 0) === 0) {
-      return servers[n]
-    }
-  }
-  return -1
-}
-
 function easyEx (path, cmdstring) {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
@@ -91,9 +109,9 @@ function easyEx (path, cmdstring) {
 
 async function pullRepoFromServer (repoName, server) {
   const date = new Date()
-  const serverPath = config.serverPrefix + server + '/repos/' + repoName
+  const serverPath = server.url + repoName
   const localPath = _getRepoPath(repoName)
-  const log = sprintf('%s:%s pullRepoFromServer:%s %s', date.toDateString(), date.toTimeString(), server, repoName)
+  const log = sprintf('%s:%s pullRepoFromServer:%s %s', date.toDateString(), date.toTimeString(), server.name, repoName)
   console.log(log)
 
   _createRepo(repoName)
