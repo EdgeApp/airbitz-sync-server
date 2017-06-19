@@ -152,20 +152,20 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     retval = easyEx(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
-    if (retry && status.absync != true) {
-      console.log(sprintf('  FAILED: %s Moving dir and retrying...', repoName))
-      try {
-        const newdir = _getReposDir() + '.bak/' + repoName
-        fs.renameSync(localPath, newdir)
-        return await pullRepoFromServer(repoName, server, false)
-      } catch (e) {
-        return false
-      }
-    } else {
+    // if (retry && status.absync != true) {
+    //   console.log(sprintf('  FAILED: %s Moving dir and retrying...', repoName))
+    //   try {
+    //     const newdir = _getReposDir() + '.bak/' + repoName
+    //     fs.renameSync(localPath, newdir)
+    //     return await pullRepoFromServer(repoName, server, false)
+    //   } catch (e) {
+    //     return false
+    //   }
+    // } else {
       console.log(sprintf('  FAILED: %s', repoName))
       console.log(status)
       return false
-    }
+    // }
   }
 
   retval = await _writeDb(host, repoName, retval)
