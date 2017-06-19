@@ -10,6 +10,7 @@ const config = require('/etc/sync_repos.config.json')
 
 const _getRepoPath = require('./create_repo.js').getRepoPath
 const _createRepo = require('./create_repo.js').createRepo
+const _getReposDir = require('./create_repo.js').getReposDir
 const _writeDb = require('./update_hash.js').writeDb
 const _dbRepos = nano.db.use('db_repos')
 
@@ -19,8 +20,8 @@ console.log(dateString() + '*** sync_repos2.js starting ***')
 
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-// const hostname = easyEx(null, 'hostname')
-const hostname = 'git2.airbitz.co'
+const hostname = easyEx(null, 'hostname')
+// const hostname = 'git2.airbitz.co'
 const hostArray = hostname.split('.')
 
 let servers = []
@@ -107,7 +108,7 @@ function easyEx (path, cmdstring) {
   return r
 }
 
-async function pullRepoFromServer (repoName, server) {
+async function pullRepoFromServer (repoName, server, retry = true) {
   const date = new Date()
   const serverPath = server.url + repoName
   const localPath = _getRepoPath(repoName)
@@ -133,6 +134,15 @@ async function pullRepoFromServer (repoName, server) {
     retval = easyEx(localPath, 'find objects -type f')
     status.find = true
 
+    // Mark the backup directory for deletion
+    if (!retry) {
+      try {
+        const bakdir = _getReposDir() + '.bak/' + repoName
+        fs.renameSync(bakdir, bakdir + '.deleteme')
+      } catch (e) {
+      }
+    }
+
     if (retval.length > 0) {
       cmd = sprintf('git push %s master', serverPath)
       easyEx(localPath, cmd)
@@ -142,9 +152,20 @@ async function pullRepoFromServer (repoName, server) {
     retval = easyEx(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
-    console.log(sprintf('  FAILED: %s', repoName))
-    console.log(status)
-    return false
+    if (retry && status.absync != true) {
+      console.log(sprintf('  FAILED: %s Moving dir and retrying...', repoName))
+      try {
+        const newdir = _getReposDir() + '.bak/' + repoName
+        fs.renameSync(localPath, newdir)
+        return await pullRepoFromServer(repoName, server, false)
+      } catch (e) {
+        return false
+      }
+    } else {
+      console.log(sprintf('  FAILED: %s', repoName))
+      console.log(status)
+      return false
+    }
   }
 
   retval = await _writeDb(host, repoName, retval)

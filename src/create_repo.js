@@ -13,6 +13,15 @@ function getRepoPath (repo) {
   return fullPath
 }
 
+function getRepoSubdir (repo) {
+  const fullPath = rootDir + '/' + repo.slice(0, 2)
+  return fullPath
+}
+
+function getReposDir () {
+  return rootDir
+}
+
 function createRepo (repo) {
   const fullPath = getRepoPath(repo)
   let stat = null
@@ -74,3 +83,5 @@ function easyEx (path, cmdstring) {
 // createRepo('12lakjaweoigjaoewigjaogji')
 module.exports.createRepo = createRepo
 module.exports.getRepoPath = getRepoPath
+module.exports.getRepoSubdir = getRepoSubdir
+module.exports.getReposDir = getReposDir
