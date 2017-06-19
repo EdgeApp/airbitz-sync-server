@@ -40,6 +40,7 @@ async function asyncMain (doc) {
 
   for (const n in array) {
     const diff = array[n]
+    console.log('Syncing repo %d of %d', n, array.length)
 
     for (const s in servers) {
       if (getServer(host) !== servers[s]) {
