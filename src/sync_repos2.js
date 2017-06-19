@@ -22,7 +22,8 @@ console.log(dateString() + '*** sync_repos2.js starting ***')
 const hostname = easyEx(null, 'hostname')
 // const hostname = 'git2.airbitz.co'
 const hostArray = hostname.split('.')
-const host = hostArray[0]
+let host = hostArray[0]
+host = host.replace(/(\r\n|\n|\r)/gm, '')
 
 main()
 
