@@ -4,6 +4,7 @@
 
 const fs = require('fs')
 const _getReposDir = require('./create_repo.js').getReposDir
+const _getRepoPath = require('./create_repo.js').getRepoPath
 
 const repos = [
   '1195d71f523efde4a71d7b821b8d3451fdb9c906',
@@ -21,6 +22,7 @@ const repos = [
 
 for (const n in repos) {
   const repoName = repos[n]
+  const localPath = _getRepoPath(repoName)
   const newdir = _getReposDir() + '.bak/' + repoName
   fs.renameSync(localPath, newdir)
 }
