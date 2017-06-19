@@ -18,6 +18,11 @@ async function writeDb (server, repo, hash) {
           resolve(true)
         }
       } else {
+        if (typeof response[server] !== 'undefined') {
+          if (response[server] === hash) {
+            resolve(true)
+          }
+        }
         resolve(insertDb(server, repo, hash, response))
       }
     })
