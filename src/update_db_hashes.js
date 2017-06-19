@@ -9,7 +9,7 @@ const _writeDb = require('./update_hash.js').writeDb
 //
 // const std = ["pipe", "inherit", "inherit"]
 // const std_noerr = ["pipe", "inherit", "ignore"]
-const LOOP_DELAY_MILLISECONDS = 10000
+// const LOOP_DELAY_MILLISECONDS = 10000
 
 console.log(dateString() + ' update_db_hashes.js starting')
 
