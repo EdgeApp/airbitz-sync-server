@@ -6,7 +6,7 @@ const nano = require('nano')('http://bitz:pillow_butt_plug@git2.airbitz.co:5984'
 const sprintf = require('sprintf-js').sprintf
 const childProcess = require('child_process')
 const config = require('/etc/sync_repos.config.json')
-// const servers = require('/etc/absync/absync.json')
+// const servers = require('/etc/absync/absync.json.donotuse')
 
 const _getRepoPath = require('./create_repo.js').getRepoPath
 const _createRepo = require('./create_repo.js').createRepo
@@ -91,12 +91,12 @@ async function asyncMain () {
     }
   }
   if (failArray.length) {
-    console.log('Failed repos:')
+    console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
     console.log(failArray)
   } else {
-    console.log('No failed repos')
+    console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
   }
-  await snooze(10000)
+  await snooze(20000)
   await asyncMain()
 }
 
