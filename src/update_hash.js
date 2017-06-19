@@ -1,7 +1,10 @@
 /**
  * Created by paul on 6/17/17.
  */
-const nano = require('nano')('http://localhost:5984')
+const config = require('/etc/sync_repos.config.json')
+const sprintf = require('sprintf-js').sprintf
+const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
+const nano = require('nano')(url)
 const _dbRepos = nano.db.use('db_repos')
 
 async function writeDb (server, repo, hash) {

@@ -1,7 +1,7 @@
 {
-  "serverName": "git1",
+  "couchUserName": "username",
+  "couchPassword": "password",
   "userDir": "/home/bitz/",
   "reposDir": "www/repos",
-  "serverPrefix": "https://",
   "repoListPath": "/home/readuser/"
 }

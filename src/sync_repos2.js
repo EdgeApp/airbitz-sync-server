@@ -2,7 +2,8 @@
  * Created by paul on 6/18/17.
  */
 const fs = require('fs')
-const nano = require('nano')('http://bitz:pillow_butt_plug@git2.airbitz.co:5984')
+const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
+const nano = require('nano')(url)
 const sprintf = require('sprintf-js').sprintf
 const childProcess = require('child_process')
 const config = require('/etc/sync_repos.config.json')
@@ -20,11 +21,11 @@ console.log(dateString() + '*** sync_repos2.js starting ***')
 
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-const hostname = easyEx(null, 'hostname')
-// const hostname = 'git2.airbitz.co'
-const hostArray = hostname.split('.')
-
 let servers = []
+
+// const hostname = 'git2.airbitz.co'
+const hostname = easyEx(null, 'hostname')
+const hostArray = hostname.split('.')
 let host = hostArray[0]
 host = host.replace(/(\r\n|\n|\r)/gm, '')
 
