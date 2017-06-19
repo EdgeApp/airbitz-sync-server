@@ -58,8 +58,8 @@ function createRepo (repo) {
     easyEx(fullPath, 'rm -rf hooks')
     easyEx(fullPath, 'rm -f description')
     easyEx(fullPath, 'ln -s /etc/absync/hooks')
-    const cmd = sprintf('chown -R %s:%s .', config.user, config.group)
-    easyEx(fullPath, cmd)
+    // const cmd = sprintf('chown -R %s:%s .', config.user, config.group)
+    // easyEx(fullPath, cmd)
   } catch (e) {
     console.log(e)
     fail()
