@@ -17,7 +17,7 @@ console.log(dateString() + '*** sync_repos2.js starting ***')
 
 // const _rootDir = config.userDir + config.reposDir
 
-// const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
+const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const hostname = easyEx(null, 'hostname')
 // const hostname = 'git2.airbitz.co'
@@ -28,14 +28,24 @@ host = host.replace(/(\r\n|\n|\r)/gm, '')
 main()
 
 function main () {
-  _dbRepos.view('repos', host, null, (err, doc) => {
-    if (err === null) {
-      asyncMain(doc)
-    }
+  asyncMain()
+}
+
+async function getRepos () {
+  return new Promise((resolve) => {
+    _dbRepos.view('repos', host, null, (err, doc) => {
+      if (err === null) {
+        // resolve({'rows': []})
+        resolve(doc)
+      } else {
+        resolve({'rows': []})
+      }
+    })
   })
 }
 
-async function asyncMain (doc) {
+async function asyncMain () {
+  const doc = await getRepos()
   const array = doc.rows
   let failArray = []
 
@@ -58,6 +68,8 @@ async function asyncMain (doc) {
   } else {
     console.log('No failed repos')
   }
+  await snooze(10000)
+  await asyncMain()
 }
 
 function getServer (prefix) {
