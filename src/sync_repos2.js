@@ -37,16 +37,26 @@ function main () {
 
 async function asyncMain (doc) {
   const array = doc.rows
+  let failArray = []
 
   for (const n in array) {
     const diff = array[n]
-    console.log('Syncing repo %d of %d', n, array.length)
+    console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
 
     for (const s in servers) {
       if (getServer(host) !== servers[s]) {
-        await pullRepoFromServer(diff.id, servers[s])
+        const ret = await pullRepoFromServer(diff.id, servers[s])
+        if (!ret) {
+          failArray.push(servers[s])
+        }
       }
     }
+  }
+  if (failArray.length) {
+    console.log('Failed repos:')
+    console.log(failArray)
+  } else {
+    console.log('No failed repos')
   }
 }
 
