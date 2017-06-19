@@ -2,9 +2,9 @@
  * Created by paul on 6/18/17.
  */
 const fs = require('fs')
+const sprintf = require('sprintf-js').sprintf
 const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
 const nano = require('nano')(url)
-const sprintf = require('sprintf-js').sprintf
 const childProcess = require('child_process')
 const config = require('/etc/sync_repos.config.json')
 // const servers = require('/etc/absync/absync.json.donotuse')
