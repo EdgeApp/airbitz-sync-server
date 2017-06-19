@@ -74,18 +74,7 @@ async function pullRepoFromServer (repoName, server) {
   const log = sprintf('%s:%s pullRepoFromServer:%s %s', date.toDateString(), date.toTimeString(), server, repoName)
   console.log(log)
 
-  let stat = null
-  try {
-    stat = fs.statSync(localPath)
-    if (!stat.isDirectory()) {
-    }
-  } catch (e) {
-    stat = null
-  }
-
-  if (stat === null) {
-    _createRepo(repoName)
-  }
+  _createRepo(repoName)
 
   const status = {'branch': false, 'absync': false, 'find': false, 'push': false, 'writedb': false}
 
