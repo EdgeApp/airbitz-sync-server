@@ -82,11 +82,16 @@ async function asyncMain () {
       continue
     }
 
+    let syncedHash = null
     for (const s in servers) {
-      if (host !== servers[s].name) {
-        const ret = await pullRepoFromServer(diff.id, servers[s])
-        if (!ret) {
-          failArray.push(diff.id)
+      if (diff.id !== syncedHash) {
+        if (host !== servers[s].name) {
+          const ret = await pullRepoFromServer(diff.id, servers[s])
+          if (!ret) {
+            failArray.push(diff.id)
+          } else {
+            syncedHash = diff.id
+          }
         }
       }
     }
