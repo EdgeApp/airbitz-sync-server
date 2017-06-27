@@ -102,7 +102,7 @@ async function asyncMain () {
   } else {
     console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
   }
-  await snooze(20000)
+  await snooze(5000)
   await asyncMain()
 }
 
