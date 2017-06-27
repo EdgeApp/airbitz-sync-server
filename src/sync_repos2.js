@@ -90,11 +90,11 @@ async function asyncMain () {
     }
 
     let syncedHash = null
-    const shuffled_servers = shuffle(servers)
+    shuffle(servers)
       
-    for (const s in shuffled_servers) {
+    for (const s in servers) {
       if (diff.id !== syncedHash) {
-        if (host !== shuffled_servers[s].name) {
+        if (host !== servers[s].name) {
           const ret = await pullRepoFromServer(diff.id, servers[s])
           if (!ret) {
             failArray.push(diff.id)
