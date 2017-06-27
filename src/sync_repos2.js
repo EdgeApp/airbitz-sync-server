@@ -69,6 +69,13 @@ async function getServers () {
   })
 }
 
+function shuffle(a) {
+  for (let i = a.length; i; i--) {
+    let j = Math.floor(Math.random() * i);
+    [a[i - 1], a[j]] = [a[j], a[i - 1]];
+  }
+}
+
 async function asyncMain () {
   servers = await getServers()
   const doc = await getRepos()
@@ -83,9 +90,11 @@ async function asyncMain () {
     }
 
     let syncedHash = null
-    for (const s in servers) {
+    const shuffled_servers = shuffle(servers)
+      
+    for (const s in shuffled_servers) {
       if (diff.id !== syncedHash) {
-        if (host !== servers[s].name) {
+        if (host !== shuffled_servers[s].name) {
           const ret = await pullRepoFromServer(diff.id, servers[s])
           if (!ret) {
             failArray.push(diff.id)
