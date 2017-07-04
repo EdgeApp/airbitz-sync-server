@@ -34,7 +34,15 @@ async function writeDb (server, repo, hash) {
 
 async function insertDb (server, repo, hash, repoObj = {}) {
   // console.log('ENTER insertDB:' + repo + ' hash:' + hash)
-  repoObj[server] = hash
+  if (hash === null) {
+    if (repoObj[server] == null) {
+      return Promise.resolve(true)
+    } else {
+      repoObj[server] = undefined
+    }
+  } else {
+    repoObj[server] = hash
+  }
 
   return new Promise((resolve) => {
     _dbRepos.insert(repoObj, repo, function (err, res) {
