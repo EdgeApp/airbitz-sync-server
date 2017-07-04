@@ -17,6 +17,7 @@ async function mainLoop () {
 
     for (const i in repos.rows) {
       const repo = repos.rows[i]
+      console.log(sprintf('Deleting %s from repo %s', process.argv[2], repo.key))
       await _writeDb(process.argv[2], repo.key, null)
     }
 
