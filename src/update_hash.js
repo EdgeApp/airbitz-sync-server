@@ -39,9 +39,11 @@ async function insertDb (server, repo, hash, repoObj = {}) {
       return Promise.resolve(true)
     } else {
       repoObj[server] = undefined
+      repoObj[server + ':time'] = undefined
     }
   } else {
     repoObj[server] = hash
+    repoObj[server + ':time'] = (new Date).getTime()
   }
 
   return new Promise((resolve) => {
