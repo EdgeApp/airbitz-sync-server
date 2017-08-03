@@ -2,6 +2,7 @@
  * Created by paul on 6/18/17.
  */
 const fs = require('fs')
+const util = require('util')
 const sprintf = require('sprintf-js').sprintf
 const config = require('/etc/sync_repos.config.json')
 const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
@@ -115,11 +116,12 @@ async function asyncMain () {
   await asyncMain()
 }
 
-function easyEx (path, cmdstring) {
+async function easyEx (path, cmdstring) {
+  const exec = util.promisify(childProcess.exec);
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
-  const r = childProcess.execFileSync(cmd, args, { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' })
+  const r = await exec(cmd, args, { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' })
   return r
 }
 
@@ -135,7 +137,7 @@ async function pullRepoFromServer (repoName, server, retry = true) {
   const status = {'branch': false, 'absync': false, 'find': false, 'push': false, 'writedb': false}
 
   try {
-    easyEx(localPath, 'git branch -D incoming')
+    await easyEx(localPath, 'git branch -D incoming')
     status.branch = true
   } catch (e) {
   }
@@ -143,7 +145,7 @@ async function pullRepoFromServer (repoName, server, retry = true) {
   let retval = ''
   try {
     let cmd = sprintf('ab-sync %s %s', localPath, serverPath)
-    easyEx(localPath, cmd)
+    await easyEx(localPath, cmd)
     status.absync = true
 
     retval = easyEx(localPath, 'find objects -type f')
@@ -153,18 +155,19 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     if (!retry) {
       try {
         const bakdir = _getReposDir() + '.bak/' + repoName
-        fs.renameSync(bakdir, bakdir + '.deleteme')
+        const rename = util.promisify(fs.rename)
+        await rename(bakdir, bakdir + '.deleteme')
       } catch (e) {
       }
     }
 
     if (retval.length > 0) {
       cmd = sprintf('git push %s master', serverPath)
-      easyEx(localPath, cmd)
+      await easyEx(localPath, cmd)
       status.push = true
     }
 
-    retval = easyEx(localPath, 'git rev-parse HEAD')
+    retval = await easyEx(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
     // if (retry && status.absync != true) {

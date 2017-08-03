@@ -8,6 +8,12 @@ console.log(dateString() + ' update_db_hashes.js starting')
 
 const _rootDir = config.userDir + config.reposDir
 
+// const hostname = 'git2.airbitz.co'
+const hostname = easyEx(null, 'hostname')
+const hostArray = hostname.split('.')
+let host = hostArray[0]
+host = host.replace(/(\r\n|\n|\r)/gm, '')
+
 // const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 mainLoop()
@@ -26,12 +32,20 @@ async function mainLoop () {
       commit = commit.replace(/(\r\n|\n|\r)/gm, '')
       // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
       // console.log('  [git rev-parse success] ' + commit)
-      await _writeDb(config.serverName, repoName, commit)
-      console.log(sprintf('writeDb %d/%d SUCCESS %-5s %-41s %-41s', n, localRepos.length, config.serverName, repoName, commit))
+      await update_hash_cli.js_writeDb(host, repoName, commit)
+      console.log(sprintf('writeDb %d/%d SUCCESS %-5s %-41s %-41s', n, localRepos.length, host, repoName, commit))
     } catch (e) {
-      console.log(sprintf('writeDb %d/%d FAILED  %-5s %-41s %-41s', n, localRepos.length, config.serverName, repoName, commit))
+      console.log(sprintf('writeDb %d/%d FAILED  %-5s %-41s %-41s', n, localRepos.length, host, repoName, commit))
     }
   }
+}
+
+function easyEx (path, cmdstring) {
+  const cmdArray = cmdstring.split(' ')
+  const cmd = cmdArray[0]
+  const args = cmdArray.slice(1, cmdArray.length)
+  const r = childProcess.execFileSync(cmd, args, { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' })
+  return r
 }
 
 function dateString () {

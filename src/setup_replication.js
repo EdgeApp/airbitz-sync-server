@@ -1,3 +1,62 @@
 /**
  * Created by paul on 6/19/17.
  */
+
+const nano = require('nano')('http://localhost:5984')
+const _dbRepos = nano.db.use('db_repos')
+
+main()
+
+function main () {
+  asyncMain()
+}
+
+async function asyncMain () {
+  servers = await getServers()
+  const doc = await getRepos()
+  await snooze(20000)
+  await asyncMain()
+}
+
+async function writeDb (server, repo, hash) {
+  // console.log('ENTER writeDb:' + repo + ' hash:' + hash)
+  return new Promise((resolve, reject) => {
+    _dbRepos.get(repo, function (err, response) {
+      if (err) {
+        if (err.error === 'not_found') {
+          // Create the db entry
+          resolve(insertDb(server, repo, hash))
+        } else {
+          console.log('  writeDb:' + repo + ' hash:' + hash + ' FAILED')
+          console.log(err)
+          resolve(true)
+        }
+      } else {
+        if (typeof response[server] !== 'undefined') {
+          if (response[server] === hash) {
+            resolve(true)
+          }
+        }
+        resolve(insertDb(server, repo, hash, response))
+      }
+    })
+  })
+}
+
+async function insertDb (server, repo, hash, repoObj = {}) {
+  // console.log('ENTER insertDB:' + repo + ' hash:' + hash)
+  repoObj[server] = hash
+
+  return new Promise((resolve) => {
+    _dbRepos.insert(repoObj, repo, function (err, res) {
+      if (err) {
+        resolve(writeDb(server, repo, hash))
+      } else {
+        // console.log('  writeDb:' + repo + ' hash:' + hash + ' SUCCESS')
+        resolve(true)
+      }
+    })
+  })
+}
+
+module.exports.writeDb = writeDb
