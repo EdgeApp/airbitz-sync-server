@@ -29,7 +29,7 @@ function createRepo (repo) {
   try {
     stat = fs.statSync(fullPath)
     if (stat.isFile()) {
-      // Error, file where there should be a directory
+      console.log('File found in repo location')
       return -1
     }
   } catch (e) {
