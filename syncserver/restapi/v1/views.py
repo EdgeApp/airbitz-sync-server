@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from restapi.utils import create_repo
+from restapi.utils import create_repo_js
 from restapi.tasks import sync_repo
 
 class RepoObject(object):
@@ -27,6 +28,23 @@ class RepoCreate(APIView):
         ser = self.repo_serializer(data=request.DATA)
         if ser.is_valid():
             return create_repo(ser.object.repo_name)
+        else:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data=ser.errors)
+
+    def get(self, request):
+        return self.common(request)
+
+    def post(self, request):
+        return self.common(request)
+
+class RepoCreateJS(APIView):
+    repo_serializer = RepoSerializer
+
+    def common(self, request):
+        print request.DATA
+        ser = self.repo_serializer(data=request.DATA)
+        if ser.is_valid():
+            return create_repo_js(ser.object.repo_name)
         else:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data=ser.errors)
 
