@@ -30,7 +30,7 @@ function createRepo (repo) {
     stat = fs.statSync(fullPath)
     if (stat.isFile()) {
       // Error, file where there should be a directory
-      fail()
+      return -1
     }
   } catch (e) {
     // Directory doesn't exist
@@ -41,7 +41,7 @@ function createRepo (repo) {
     try {
       mkdirp.sync(fullPath)
     } catch (e) {
-      fail()
+      return -1
     }
   }
 
@@ -62,14 +62,10 @@ function createRepo (repo) {
     // easyEx(fullPath, cmd)
   } catch (e) {
     console.log(e)
-    fail()
+    return -1
   }
 
   return true
-}
-
-function fail () {
-  return -1
 }
 
 function easyEx (path, cmdstring) {
