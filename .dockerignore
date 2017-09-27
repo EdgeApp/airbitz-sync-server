@@ -1,0 +1,17 @@
+*.pyc
+logs
+*.db
+*.swp
+*.swo
+.vagrant
+.vagrant*
+.env
+node_modules/
+.git
+
+# pycharm
+*.idea
+
+# codekit
+*-ck.js
+
