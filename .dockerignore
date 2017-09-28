@@ -8,7 +8,7 @@ logs
 .env
 node_modules/
 .git
-
+Dockerfile
 # pycharm
 *.idea
 

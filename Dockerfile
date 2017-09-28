@@ -9,17 +9,15 @@ RUN apt-get update \
 # Create the app server user
 RUN useradd -m -g users -G sudo -s /bin/bash -p bitz bitz
 
-# Clone the code
+# Create working directory
 RUN mkdir -p /home/bitz/code/airbitz-sync-server
-COPY . /home/bitz/code/airbitz-sync-server
-
 WORKDIR /home/bitz/code/airbitz-sync-server
 
 # Add user script
+COPY ./build/adduserplus.sh ./build/adduserplus.sh
+COPY ./build/usersSSHkeys ./build/usersSSHkeys
 RUN chmod +x ./build/adduserplus.sh
 RUN ./build/adduserplus.sh ./build/usersSSHkeys
-
-WORKDIR /
 
 # Update /etc/hostname
 RUN echo "git42" > /etc/hostname
@@ -48,44 +46,38 @@ RUN sudo su - bitz
 # Create the virtual environment
 RUN mkdir -p /home/bitz/airbitz
 RUN cd /home/bitz/airbitz
-RUN export ENV=virtualenv
+RUN virtualenv ENV
 
 # Change code path
 RUN cd /home/bitz/code
-RUN ln -s /home/bitz/code/airbitz-sync-server/syncserver /home/bitz/airbitz/ENV/airbitz
-
-# Update the virtualenv with dependencies and sync the django database
-RUN source /home/bitz/airbitz/ENV/bin/activate
-RUN pip install -r /home/bitz/code/airbitz-sync-server/staging/requirements.txt
-RUN cd /home/bitz/code/airbitz-sync-server/syncserver
-RUN python manage.py migrate auth
-RUN python manage.py migrate
-
-WORKDIR /home/bitz/code/airbitz-sync-server
+RUN mkdir -p /home/bitz/airbitz/ENV/airbitz
+RUN ln -s ./syncserver /home/bitz/airbitz/ENV/airbitz
 
 # Setup the absync utility. The absync utility is called from git-hooks. When changes are pushed to git42.airbitz.co the post-receive hook is called and it calls absync.
 RUN sudo mkdir -p /etc/absync
-RUN cp ./build/absync.conf /etc/absync/absync.conf
+COPY ./build/absync.conf /etc/absync/absync.conf
 
 # Install the git hooks
+RUN mkdir -p ./staging
+COPY ./staging ./staging
 RUN sudo rsync -avz ./staging/hooks /etc/absync/
 
 # Copy sync utilities
-RUN sudo cp ./staging/create_repo.sh /usr/bin/create_ab_repo.sh
+COPY ./staging/create_repo.sh /usr/bin/create_ab_repo.sh
 RUN sudo cp ./staging/libgit2* /usr/lib
 RUN sudo cp ./staging/ab-sync /usr/bin/
 
-# Setup supervisord configuration
+# Copy supervisord configuration
 RUN sudo cp ./staging/supervisord/* /etc/supervisor/conf.d/
-# Edit celeryd.conf and set SYNC_SERVER_URL to other servers
-RUN cat /etc/supervisor/conf.d/celeryd.conf
-# RUN sudo vi /etc/supervisor/conf.d/celeryd.conf
-# RUN sudo supervisorctl update
 
 #18 18 18 18 18 18 18 18 18 
 
 # Install Node Modules
 RUN sudo npm install -y forever forever-service -g
+
+# Clone package.json
+COPY ./package.json ./package.json
+
 # run as user ‘bitz’
 RUN npm install
 
@@ -101,5 +93,9 @@ RUN sudo chmod -R 0770 /usr/bin/couchdb /etc/couchdb /usr/share/couchdb
 # RUN sed '1c\127.0.0.1 git42.airbitz.co git42' /etc/hosts > /tmpfile
 # RUN mv /tmpfile /etc/hosts
 
+# Clone the code
+COPY . .
+
+COPY ./build/run.sh ./build/run.sh
 RUN chmod +x ./build/run.sh
 CMD ./build/run.sh
