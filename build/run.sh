@@ -18,25 +18,6 @@ pip install -r /home/bitz/code/airbitz-sync-server/staging/requirements.txt
 python ./syncserver/manage.py migrate auth
 python ./syncserver/manage.py migrate
 
-# Run Couchdb
-sudo couchdb start -b
-sleep 1s
-HOST="http://bitz:pillow_butt_plug@127.0.0.1:5984"
-curl $HOST
-curl -X PUT "$HOST"/db_repos
-
-# Enable replication from this server
-replicationServers=$(cat ./build/replicationServers.json | jq -c '.[]')
-
-while read -r replicationServer; do
-  id=$(echo $replicationServer | jq '._id')
-  curl -X PUT "$HOST"/_replicator/"$id" -d "$replicationServer"
-done <<< "$replicationServers"
-
-# Add server to the database under the ‘servers’ document
-gitServers=$(cat ./build/gitServers.json)
-curl -X PUT "$HOST"/db_repos/00000000_servers -d $gitServers
-
 # # From local dev machine
 # rsync -a [user]@git1.airbitz.co:/etc/ssl/wildcard ~/ 
 # rsync -av ~/wildcard [user]@git42.airbitz.co:
@@ -64,3 +45,31 @@ curl -X PUT "$HOST"/db_repos/00000000_servers -d $gitServers
 # sudo apachectl -t
 # # If all is well you can restart apache
 # sudo service apache2 restart
+
+# Run Couchdb
+sudo couchdb start -b
+sleep 1s
+HOST="http://bitz:pillow_butt_plug@127.0.0.1:5984"
+curl $HOST
+curl -X PUT "$HOST"/db_repos
+
+# Enable replication from this server
+replicationServers=$(cat ./build/replicationServers.json | jq -c '.[]')
+
+while read -r replicationServer; do
+  id=$(echo $replicationServer | jq '._id')
+  curl -X PUT "$HOST"/_replicator/"$id" -d "$replicationServer"
+done <<< "$replicationServers"
+
+# Add server to the database under the ‘servers’ document
+gitServers=$(cat ./build/gitServers.json)
+curl -X PUT "$HOST"/db_repos/00000000_servers -d $gitServers
+
+# Add a db query view for this server
+# In web UI, goto db_repos -> View (Top left). Choose ‘Design Documents’.
+# Click on the `_design/repos`
+# You’ll see several entries under ‘views’. Copy one of the entries and rename it to `git42`.
+# Change the line of code `const me = ‘gitX’ to be the name of the new git server.
+
+#install crontab file
+runuser -l bitz -c 'crontab /home/bitz/code/airbitz-sync-server/bin/crontab'
