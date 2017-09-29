@@ -30,7 +30,7 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 RUN sudo add-apt-repository ppa:couchdb/stable -y
 RUN sudo apt-get -y update
 RUN sudo apt-get -y upgrade
-RUN sudo apt-get install -y couchdb nodejs git build-essential ufw apache2 supervisor python-pip python-dev python-virtualenv libncurses5-dev vim git fail2ban libpq-dev postgresql-9.5 rabbitmq-server -y
+RUN sudo apt-get install -y jq couchdb nodejs git build-essential ufw apache2 supervisor python-pip python-dev python-virtualenv libncurses5-dev vim git fail2ban libpq-dev postgresql-9.5 rabbitmq-server -y
 
 # Configure needed apache modules
 RUN sudo a2enmod rewrite proxy proxy_http proxy_html cgid ssl status xml2enc
@@ -88,11 +88,11 @@ RUN sudo mkdir -p /var/run/postgresql
 RUN sudo mkdir -p /var/run/couchdb
 RUN sudo chown -R couchdb:couchdb /usr/bin/couchdb /etc/couchdb /usr/share/couchdb /var/run/couchdb
 RUN sudo chmod -R 0770 /usr/bin/couchdb /etc/couchdb /usr/share/couchdb
+COPY ./build/couchdbSettings.conf /etc/couchdb/local.ini
 
 #Update /etc/hosts
 # RUN sed '1c\127.0.0.1 git42.airbitz.co git42' /etc/hosts > /tmpfile
 # RUN mv /tmpfile /etc/hosts
-
 # Clone the code
 COPY . .
 

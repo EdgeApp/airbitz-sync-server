@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x
-# Setup supervisord configuration
+# # Setup supervisord configuration
 sudo supervisord
 sleep 1s
 sudo supervisorctl update
@@ -21,7 +21,21 @@ python ./syncserver/manage.py migrate
 # Run Couchdb
 sudo couchdb start -b
 sleep 1s
-curl localhost:5984
+HOST="http://bitz:pillow_butt_plug@127.0.0.1:5984"
+curl $HOST
+curl -X PUT "$HOST"/db_repos
+
+# Enable replication from this server
+replicationServers=$(cat ./build/replicationServers.json | jq -c '.[]')
+
+while read -r replicationServer; do
+  id=$(echo $replicationServer | jq '._id')
+  curl -X PUT "$HOST"/_replicator/"$id" -d "$replicationServer"
+done <<< "$replicationServers"
+
+# Add server to the database under the ‘servers’ document
+gitServers=$(cat ./build/gitServers.json)
+curl -X PUT "$HOST"/db_repos/00000000_servers -d $gitServers
 
 # # From local dev machine
 # rsync -a [user]@git1.airbitz.co:/etc/ssl/wildcard ~/ 

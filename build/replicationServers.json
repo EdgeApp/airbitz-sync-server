@@ -1,0 +1,9 @@
+[
+  {
+    "_id": "rep_gitX",
+    "source": "https://bitz:pillow_butt_plug@gitX.airbitz.co:6984/db_repos",
+    "target": "https://bitz:pillow_butt_plug@localhost:6984/db_repos",
+    "continuous": true,
+    "owner": "bitz"
+  }
+]
