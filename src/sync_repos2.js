@@ -108,6 +108,11 @@ async function asyncMain () {
   if (failArray.length) {
     console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
     console.log(failArray)
+    try {
+      fs.writeFileSync(config.userDir + config.failedRepos, JSON.stringify(failArray))
+    } catch (e) {
+      console.log(e)
+    }
   } else {
     console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
   }

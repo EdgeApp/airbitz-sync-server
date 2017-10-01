@@ -3,5 +3,6 @@
   "couchPassword": "password",
   "userDir": "/home/bitz/",
   "reposDir": "www/repos",
+  "failedRepos": "failedRepos.json",
   "repoListPath": "/home/readuser/"
 }
