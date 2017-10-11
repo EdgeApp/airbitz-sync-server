@@ -106,6 +106,14 @@ def git_update(path, storeId, changes, start_hash=None):
         print 'Working Tree', working_tree
         print e
 
+class InvalidFilename(Exception):
+    pass
+
+def test_changes(changes):
+    for filename,v in changes.iteritems():
+        if filename in ('.', '..'):
+            raise InvalidFilename("'{0}' is not a valid filename".format(filename))
+
 class RepoStore(APIView):
     # Fetch latest
     def get(self, request, storeId, start_hash=None):
@@ -134,10 +142,13 @@ class RepoStore(APIView):
 
         try:
             changes = json.loads(request.body).get("changes", [])
+            test_changes(changes)
             if len(changes):
                 git_update(path, storeId, changes, start_hash=start_hash)
             payload = git_change_dict(path, rev=start_hash)
             return Response(status=status.HTTP_200_OK, data=payload)
+        except InvalidFilename as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={'msg': e.args[0]})
         except Exception as e:
             print e
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

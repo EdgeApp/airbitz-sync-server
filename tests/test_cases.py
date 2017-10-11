@@ -96,6 +96,16 @@ class V2RepoTests(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         print 'Test Put Change File 3'
         print '\t', r.text
+
+        payload={
+            "changes": {
+                ".": "this should fail",
+            }
+        }
+        r = requests.post(self.API_PATH + second_hash, data=json.dumps(payload), headers=HEADERS, verify=False)
+        self.assertEqual(r.status_code, 400)
+        print 'Test Post Bad file'
+        print '\t', r.text
         
         r = requests.get(self.API_PATH, data="", headers=HEADERS, verify=False)
         print 'Test Entire History'
