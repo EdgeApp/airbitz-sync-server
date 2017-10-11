@@ -91,7 +91,7 @@ def git_update(path, storeId, changes, start_hash=None):
         f = open(working_tree + '/' + filename, 'wb')
         f.write(json.dumps(v))
         f.close()
-        check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "add", filename], cwd=working_tree)
+        check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "add", "--", filename], cwd=working_tree)
     if git_dirty(path, working_tree):
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "commit", "-m", "web commit"], cwd=working_tree)
     else:
