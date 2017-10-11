@@ -155,6 +155,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propogate': True,
         },
+        'restapi.v2': {
+            'handlers': ['file', 'console', 'catch-all', 'errors'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
         'django.request': {
             'handlers': ['file', 'console', 'catch-all', 'errors'],
             'level': 'ERROR',

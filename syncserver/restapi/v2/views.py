@@ -9,6 +9,9 @@ import json, os, os.path, random, string
 
 from restapi.utils import create_repo
 
+import logging
+logger = logging.getLogger(__name__)
+
 TMP_DIR = '/tmp'
 
 def create_path(storeId):
@@ -106,6 +109,7 @@ def git_update(path, storeId, changes, start_hash=None):
 class RepoStore(APIView):
     # Fetch latest
     def get(self, request, storeId, start_hash=None):
+        logger.info("get - {0}".format(storeId))
         path = create_path(storeId)
         if not os.path.isdir(path):
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -121,6 +125,7 @@ class RepoStore(APIView):
 
     # Update repository
     def post(self, request, storeId, start_hash=None):
+        logger.info("post - {0}: {1}".format(storeId, request.body))
         path = create_path(storeId)
         if not os.path.isdir(path):
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -139,6 +144,7 @@ class RepoStore(APIView):
 
     # New repository
     def put(self, request, storeId):
+        logger.info("put - {0}: {1}".format(storeId, request.body))
         path = create_path(storeId)
         if os.path.isdir(path):
             return Response(status=status.HTTP_409_CONFLICT)
