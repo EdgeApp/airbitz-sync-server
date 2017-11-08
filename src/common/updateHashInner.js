@@ -10,7 +10,7 @@ const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.
 const nano = require('nano')(url)
 const _dbRepos = nano.db.use('db_repos')
 
-async function updateHash (server: string, repo:string, hash: string) {
+async function updateHash (server: string, repo:string, hash: string | null) {
   // console.log('ENTER writeDb:' + repo + ' hash:' + hash)
   return new Promise((resolve, reject) => {
     _dbRepos.get(repo, function (err, response) {
@@ -19,7 +19,11 @@ async function updateHash (server: string, repo:string, hash: string) {
           // Create the db entry
           resolve(insertDb(server, repo, hash))
         } else {
-          console.log('  updateHash:' + repo + ' hash:' + hash + ' FAILED')
+          if (hash) {
+            console.log('  updateHash:' + repo + ' hash:' + hash + ' FAILED')
+          } else {
+            console.log('  updateHash:' + repo + ' hash: NULLptr' + ' FAILED')
+          }
           console.log(err)
           resolve(true)
         }
@@ -35,7 +39,7 @@ async function updateHash (server: string, repo:string, hash: string) {
   })
 }
 
-async function insertDb (server, repo, hash: string, repoObj: any = {}) {
+async function insertDb (server, repo, hash: string | null, repoObj: any = {}) {
   // console.log('ENTER insertDB:' + repo + ' hash:' + hash)
   if (hash === null) {
     if (repoObj[server] == null) {
