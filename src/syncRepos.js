@@ -7,7 +7,7 @@ import fs from 'fs'
 import { sprintf } from 'sprintf-js'
 import nano from 'nano'
 import { createRepo } from './common/createRepoInner.js'
-import { updateHash } from './common/updateHash.js'
+import { updateHash } from './common/updateHashInner.js'
 import {
   getRepoPath,
   getReposDir,

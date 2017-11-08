@@ -1,7 +1,7 @@
 // @flow
 
 const { createRepo } = require('./common/createRepoInner.js')
-const { updateHash } = require('./common/updateHash.js')
+const { updateHash } = require('./common/updateHashInner.js')
 const { getHostname } = require('./common/syncUtils.js')
 
 async function main () {

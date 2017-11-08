@@ -4,7 +4,7 @@ const fs = require('fs')
 const { sprintf } = require('sprintf-js')
 const childProcess = require('child_process')
 
-const { updateHash } = require('./common/updateHash.js')
+const { updateHash } = require('./common/updateHashInner.js')
 const { getRepoPath, dateString, getReposDir, getRepoListFile, getHostname } = require('./common/syncUtils.js')
 
 console.log(dateString() + ' updateReposHashes.js starting')
