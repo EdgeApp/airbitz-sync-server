@@ -82,9 +82,13 @@ def git_update(path, storeId, changes, start_hash=None):
     check_output(['git', 'config', '--global', 'user.email', 'api@airbitz.co'])
     check_output(['git', 'config', '--global', 'user.name', 'Airbitz API'])
 
+    # Prepare working tree:
     working_tree='{0}/{1}{2}'.format(TMP_DIR, storeId, gen_id())
     print working_tree
     os.makedirs(working_tree)
+    check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "reset"], cwd=working_tree)
+
+    # Add changed files:
     for k,v in changes.iteritems():
         filename = k
         try:
@@ -94,8 +98,9 @@ def git_update(path, storeId, changes, start_hash=None):
         f = open(working_tree + '/' + filename, 'wb')
         f.write(json.dumps(v))
         f.close()
-        check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "reset"], cwd=working_tree)
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "add", "--", filename], cwd=working_tree)
+
+    # Make the commit:
     if git_dirty(path, working_tree):
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "commit", "-m", "web commit"], cwd=working_tree)
     else:
