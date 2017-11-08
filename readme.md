@@ -28,19 +28,21 @@ Delete entries in the sync database for a specific GIT server. This does not del
 
     node lib/deleteServer.js [server name]
 
-Prune Auth server backups
-
-    node lib/pruneBackups.js
-
 Update a specific repos hash for a specific server in CouchDB
 
     node lib/updateHash.js [server] [repo] [hash]
 
-Loop over all repos and update the DB with their current hash
+Loop over all repos and update the DB with their current hash.
 
     node lib/updateReposHashes.js
+
+## The following should be run as background services
 
 This is the most important script in this repo. This script will run in the background and query CouchDB looking for repos in remote servers that need to be sync'ed with the local server. Must be run as a service in the background
 
     node lib/syncRepos.js
+
+Prune Auth server backups. This will loop and prune excessive backups
+
+    node lib/pruneBackups.js
 
