@@ -1,39 +1,36 @@
 /**
  * Created by paul on 6/18/17.
+ * @flow
  */
-const fs = require('fs')
-const sprintf = require('sprintf-js').sprintf
-const config = require('/etc/sync_repos.config.json')
-const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
-const nano = require('nano')(url)
-const childProcess = require('child_process')
-// const servers = require('/etc/absync/absync.json.donotuse')
 
-const _getRepoPath = require('./create_repo.js').getRepoPath
-const _createRepo = require('./create_repo.js').createRepo
-const _getReposDir = require('./create_repo.js').getReposDir
-const _writeDb = require('./update_hash.js').writeDb
-const _dbRepos = nano.db.use('db_repos')
+import fs from 'fs'
+import { sprintf } from 'sprintf-js'
+import nano from 'nano'
+import { createRepo } from './common/createRepo.js'
+import { updateHash } from './common/updateHash.js'
+import {
+  getRepoPath,
+  getReposDir,
+  getFailedReposFileName,
+  getCouchUrl,
+  easyEx,
+  snooze,
+  dateString
+} from './common/syncUtils.js'
 
-console.log(dateString() + '*** sync_repos2.js starting ***')
+const url = getCouchUrl()
 
-// const _rootDir = config.userDir + config.reposDir
+const _dbRepos = nano(url).db.use('db_repos')
 
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
+console.log(dateString() + '*** syncRepos.js starting ***')
 
 let servers = []
 
 // const hostname = 'git2.airbitz.co'
-const hostname = easyEx(null, 'hostname')
+const hostname = easyEx('', 'hostname')
 const hostArray = hostname.split('.')
 let host = hostArray[0]
 host = host.replace(/(\r\n|\n|\r)/gm, '')
-
-main()
-
-function main () {
-  asyncMain()
-}
 
 async function getRepos () {
   return new Promise((resolve) => {
@@ -69,20 +66,23 @@ async function getServers () {
   })
 }
 
-function shuffle(a) {
-  for (let i = a.length; i; i--) {
-    let j = Math.floor(Math.random() * i);
-    [a[i - 1], a[j]] = [a[j], a[i - 1]];
+function shuffle (a: Array<any>) {
+  let j, x, i
+  for (i = a.length - 1; i > 0; i--) {
+    j = Math.floor(Math.random() * (i + 1))
+    x = a[i]
+    a[i] = a[j]
+    a[j] = x
   }
 }
 
-async function asyncMain () {
+async function main () {
   servers = await getServers()
   const doc = await getRepos()
   const array = doc.rows
   let failArray = []
 
-  for (const n in array) {
+  for (let n = 0; n < array.length; n++) {
     const diff = array[n]
     console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
     if (typeof diff.value.servers !== 'undefined') {
@@ -91,8 +91,8 @@ async function asyncMain () {
 
     let syncedHash = null
     shuffle(servers)
-      
-    for (const s in servers) {
+
+    for (let s = 0; s < servers.length; s++) {
       if (diff.id !== syncedHash) {
         if (host !== servers[s].name) {
           const ret = await pullRepoFromServer(diff.id, servers[s])
@@ -109,7 +109,7 @@ async function asyncMain () {
     console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
     console.log(failArray)
     try {
-      fs.writeFileSync(config.userDir + config.failedRepos, JSON.stringify(failArray))
+      fs.writeFileSync(getFailedReposFileName(), JSON.stringify(failArray))
     } catch (e) {
       console.log(e)
     }
@@ -117,25 +117,17 @@ async function asyncMain () {
     console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
   }
   await snooze(5000)
-  await asyncMain()
-}
-
-function easyEx (path, cmdstring) {
-  const cmdArray = cmdstring.split(' ')
-  const cmd = cmdArray[0]
-  const args = cmdArray.slice(1, cmdArray.length)
-  const r = childProcess.execFileSync(cmd, args, { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' })
-  return r
+  await main()
 }
 
 async function pullRepoFromServer (repoName, server, retry = true) {
   const date = new Date()
   const serverPath = server.url + repoName
-  const localPath = _getRepoPath(repoName)
+  const localPath = getRepoPath(repoName)
   const log = sprintf('%s:%s pullRepoFromServer:%s %s', date.toDateString(), date.toTimeString(), server.name, repoName)
   console.log(log)
 
-  _createRepo(repoName)
+  createRepo(repoName)
 
   const status = {'branch': false, 'absync': false, 'find': false, 'push': false, 'writedb': false}
 
@@ -157,7 +149,7 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     // Mark the backup directory for deletion
     if (!retry) {
       try {
-        const bakdir = _getReposDir() + '.bak/' + repoName
+        const bakdir = getReposDir() + '.bak/' + repoName
         fs.renameSync(bakdir, bakdir + '.deleteme')
       } catch (e) {
       }
@@ -172,23 +164,12 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     retval = easyEx(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
-    // if (retry && status.absync != true) {
-    //   console.log(sprintf('  FAILED: %s Moving dir and retrying...', repoName))
-    //   try {
-    //     const newdir = _getReposDir() + '.bak/' + repoName
-    //     fs.renameSync(localPath, newdir)
-    //     return await pullRepoFromServer(repoName, server, false)
-    //   } catch (e) {
-    //     return false
-    //   }
-    // } else {
-      console.log(sprintf('  FAILED: %s', repoName))
-      console.log(status)
-      return false
-    // }
+    console.log(sprintf('  FAILED: %s', repoName))
+    console.log(status)
+    return false
   }
 
-  retval = await _writeDb(host, repoName, retval)
+  retval = await updateHash(host, repoName, retval)
   if (!retval) {
     status.writedb = retval
     console.log(sprintf('  FAILED:  %s', repoName))
@@ -198,10 +179,6 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     console.log(sprintf('  SUCCESS: %s', repoName))
     return true
   }
-
 }
 
-function dateString () {
-  const date = new Date()
-  return date.toDateString() + ':' + date.toTimeString()
-}
+main()
