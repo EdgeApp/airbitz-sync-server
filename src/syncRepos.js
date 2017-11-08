@@ -6,7 +6,7 @@
 import fs from 'fs'
 import { sprintf } from 'sprintf-js'
 import nano from 'nano'
-import { createRepo } from './common/createRepo.js'
+import { createRepo } from './common/createRepoInner.js'
 import { updateHash } from './common/updateHash.js'
 import {
   getRepoPath,
@@ -27,7 +27,7 @@ console.log(dateString() + '*** syncRepos.js starting ***')
 let servers = []
 
 // const hostname = 'git2.airbitz.co'
-const hostname = easyEx('', 'hostname')
+const hostname = easyEx(null, 'hostname')
 const hostArray = hostname.split('.')
 let host = hostArray[0]
 host = host.replace(/(\r\n|\n|\r)/gm, '')

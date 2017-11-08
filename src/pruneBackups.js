@@ -3,9 +3,12 @@
  * @flow
  */
 
-import fs from 'fs'
-import { sprintf } from 'sprintf-js'
-import { type PruneFilesParams, pruneFiles } from './common/pruneBackupsInner.js'
+import type { PruneFilesParams } from './common/pruneBackupsInner.js'
+
+const fs = require('fs')
+const { sprintf } = require('sprintf-js')
+const { pruneFiles } = require('./common/pruneBackupsInner.js')
+const { getAuthBackupsDir, snooze, dateString } = require('./common/syncUtils.js')
 
 const NUM_DAYS_HOURLY_BACKUP = 1
 const NUM_MONTHS_DAILY_BACKUP = 1
@@ -16,13 +19,7 @@ const RUN_TEST = false
 
 // const RUN_FREQUENCY = (1000 * 10) // Run every 10 seconds
 const RUN_FREQUENCY = (1000 * 60 * 60 * 4) // Run every 4 hours
-
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms))
-
-function dateString () {
-  const date = new Date()
-  return date.toDateString() + ':' + date.toTimeString()
-}
+const backupDir = getAuthBackupsDir()
 
 async function main () {
   while (1) {
@@ -30,7 +27,6 @@ async function main () {
 
     let backupFiles = []
 // const backupDir = '/var/www/html/backups/'
-    const backupDir = '/home/bitz/backups/'
 
     if (!RUN_TEST) {
       const files = fs.readdirSync(backupDir)

@@ -3,7 +3,7 @@
  * @flow
  */
 
-import { sprintf } from 'sprintf-js'
+const { sprintf } = require('sprintf-js')
 
 function monthDiff (d1: Date, d2: Date) {
   let months
@@ -61,7 +61,7 @@ export type PruneFilesParams = {
   numMonthsMonthly: number
 }
 
-export function pruneFiles (pruneFilesParams: PruneFilesParams) {
+function pruneFiles (pruneFilesParams: PruneFilesParams) {
   const {
     currentDate,
     files,
@@ -152,3 +152,5 @@ export function pruneFiles (pruneFilesParams: PruneFilesParams) {
   const dFiles = (arrayDiff(files, keepFiles))
   return dFiles
 }
+
+module.exports = { pruneFiles }

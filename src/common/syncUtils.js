@@ -3,42 +3,46 @@
  * @flow
  */
 
-import childProcess from 'child_process'
-import { sprintf } from 'sprintf-js'
+const childProcess = require('child_process')
+const { sprintf } = require('sprintf-js')
 
 // $FlowFixMe
 const config = require('/etc/syncConfig.json')
 
 const rootDir = config.userDir + config.reposDir
 
-export function getRepoPath (repo: string): string {
+function getAuthBackupsDir () {
+  return config.authBackupsDir
+}
+
+function getRepoPath (repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2) + '/' + repo
   return fullPath
 }
 
-export function getFailedReposFileName (): string {
+function getFailedReposFileName (): string {
   return config.userDir + config.failedRepos
 }
 
-export function getCouchUrl (): string {
+function getCouchUrl (): string {
   return sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
 }
 
-export function getRepoSubdir (repo: string): string {
+function getRepoSubdir (repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2)
   return fullPath
 }
 
-export function getReposDir (): string {
+function getReposDir (): string {
   return rootDir
 }
 
-export function dateString () {
+function dateString () {
   const date = new Date()
   return date.toDateString() + ':' + date.toTimeString()
 }
 
-export function snooze (ms: number) {
+function snooze (ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -50,13 +54,32 @@ export function snooze (ms: number) {
 //   env: any
 // }
 
-export function easyEx (path: string, cmdstring: string): string {
+function easyEx (path: string | null, cmdstring: string): string {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
+
+  let opts
+  if (path) {
+    opts = { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' }
+  } else {
+    opts = { encoding: 'utf8', timeout: 20000, killSignal: 'SIGKILL' }
+  }
   // $FlowFixMe return val is a string not a buffer
-  const r: string = childProcess.execFileSync(cmd, args, { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' })
+  const r: string = childProcess.execFileSync(cmd, args, opts)
   return r
 }
 
 // createRepo('12lakjaweoigjaoewigjaogji')
+
+module.exports = {
+  getAuthBackupsDir,
+  easyEx,
+  snooze,
+  dateString,
+  getReposDir,
+  getRepoSubdir,
+  getCouchUrl,
+  getFailedReposFileName,
+  getRepoPath
+}

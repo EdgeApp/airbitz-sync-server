@@ -3,11 +3,11 @@
  * @flow
  */
 
-import fs from 'fs'
-import mkdirp from 'mkdirp'
-import { getRepoPath, easyEx } from './syncUtils.js'
+const fs = require('fs')
+const mkdirp = require('mkdirp')
+const { getRepoPath, easyEx } = require('./syncUtils.js')
 
-export function createRepo (repo: string) {
+function createRepo (repo: string) {
   const fullPath = getRepoPath(repo)
   let stat = null
 
@@ -52,3 +52,5 @@ export function createRepo (repo: string) {
 
   return true
 }
+
+module.exports = { createRepo }

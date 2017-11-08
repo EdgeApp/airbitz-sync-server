@@ -10,7 +10,7 @@ const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.
 const nano = require('nano')(url)
 const _dbRepos = nano.db.use('db_repos')
 
-export async function updateHash (server: string, repo:string, hash: string) {
+async function updateHash (server: string, repo:string, hash: string) {
   // console.log('ENTER writeDb:' + repo + ' hash:' + hash)
   return new Promise((resolve, reject) => {
     _dbRepos.get(repo, function (err, response) {
@@ -61,3 +61,5 @@ async function insertDb (server, repo, hash: string, repoObj: any = {}) {
     })
   })
 }
+
+module.exports = { updateHash }
