@@ -85,6 +85,7 @@ def git_update(path, storeId, changes, start_hash=None):
     working_tree='{0}/{1}{2}'.format(TMP_DIR, storeId, gen_id())
     print working_tree
     os.makedirs(working_tree)
+    check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "reset"], cwd=working_tree)
     for k,v in changes.iteritems():
         filename = k
         try:
@@ -94,7 +95,6 @@ def git_update(path, storeId, changes, start_hash=None):
         f = open(working_tree + '/' + filename, 'wb')
         f.write(json.dumps(v))
         f.close()
-        check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "reset"], cwd=working_tree)
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "add", "--", filename], cwd=working_tree)
     if git_dirty(path, working_tree):
         check_output(["sudo", "git", "--git-dir={0}".format(path), '--work-tree={0}'.format(working_tree), "commit", "-m", "web commit"], cwd=working_tree)
