@@ -28,6 +28,18 @@ function getCouchUrl (): string {
   return sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
 }
 
+function getRepoListFile (): string {
+  return config.repoListPath + 'repolist.txt'
+}
+
+function getHostname (): string {
+  const hostname = easyEx(null, 'hostname')
+  const hostArray = hostname.split('.')
+  let host = hostArray[0]
+  host = host.replace(/(\r\n|\n|\r)/gm, '')
+  return host
+}
+
 function getRepoSubdir (repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2)
   return fullPath
@@ -78,6 +90,8 @@ module.exports = {
   snooze,
   dateString,
   getReposDir,
+  getRepoListFile,
+  getHostname,
   getRepoSubdir,
   getCouchUrl,
   getFailedReposFileName,

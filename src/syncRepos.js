@@ -15,6 +15,7 @@ import {
   getCouchUrl,
   easyEx,
   snooze,
+  getHostname,
   dateString
 } from './common/syncUtils.js'
 
@@ -26,11 +27,7 @@ console.log(dateString() + '*** syncRepos.js starting ***')
 
 let servers = []
 
-// const hostname = 'git2.airbitz.co'
-const hostname = easyEx(null, 'hostname')
-const hostArray = hostname.split('.')
-let host = hostArray[0]
-host = host.replace(/(\r\n|\n|\r)/gm, '')
+const host = getHostname()
 
 async function getRepos () {
   return new Promise((resolve) => {

@@ -2,7 +2,7 @@
 
 const { createRepo } = require('./common/createRepoInner.js')
 const { updateHash } = require('./common/updateHash.js')
-const { easyEx } = require('./common/syncUtils.js')
+const { getHostname } = require('./common/syncUtils.js')
 
 async function main () {
   if (process.argv.length < 3) {
@@ -10,10 +10,7 @@ async function main () {
   }
 
   try {
-    const hostname = easyEx(null, 'hostname')
-    const hostArray = hostname.split('.')
-    let host = hostArray[0]
-    host = host.replace(/(\r\n|\n|\r)/gm, '')
+    const host = getHostname()
 
     if (createRepo(process.argv[2]) === -1) {
       process.exit(-1)

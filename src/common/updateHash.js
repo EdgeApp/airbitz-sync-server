@@ -19,7 +19,7 @@ async function updateHash (server: string, repo:string, hash: string) {
           // Create the db entry
           resolve(insertDb(server, repo, hash))
         } else {
-          console.log('  writeDb:' + repo + ' hash:' + hash + ' FAILED')
+          console.log('  updateHash:' + repo + ' hash:' + hash + ' FAILED')
           console.log(err)
           resolve(true)
         }
