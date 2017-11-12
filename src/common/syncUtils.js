@@ -11,6 +11,11 @@ const config = require('/etc/syncConfig.json')
 
 const rootDir = config.userDir + config.reposDir
 
+function isHex (h: string) {
+  const a = parseInt(h, 16)
+  return (a.toString(16) === h)
+}
+
 function getAuthBackupsDir () {
   return config.authBackupsDir
 }
@@ -37,7 +42,7 @@ function getHostname (): string {
   const hostArray = hostname.split('.')
   let host = hostArray[0]
   host = host.replace(/(\r\n|\n|\r)/gm, '')
-  return host
+  return host.toLowerCase()
 }
 
 function getRepoSubdir (repo: string): string {
@@ -95,5 +100,6 @@ module.exports = {
   getRepoSubdir,
   getCouchUrl,
   getFailedReposFileName,
-  getRepoPath
+  getRepoPath,
+  isHex
 }

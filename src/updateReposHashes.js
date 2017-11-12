@@ -4,12 +4,26 @@ const fs = require('fs')
 const { sprintf } = require('sprintf-js')
 const childProcess = require('child_process')
 
-const { updateHash } = require('./common/updateHashInner.js')
-const { getRepoPath, dateString, getReposDir, getRepoListFile, getHostname } = require('./common/syncUtils.js')
+let { updateHash, deleteRepoRecord } = require('./common/updateHashInner.js')
+const { getRepoPath, dateString, getReposDir, getRepoListFile, getHostname, isHex } = require('./common/syncUtils.js')
 
 console.log(dateString() + ' updateReposHashes.js starting')
 
 const hostname = getHostname()
+
+const TEST_ONLY = true // Set to true to not execute any disk write functions
+
+if (TEST_ONLY) {
+  updateHash = function (hostname: string, repoName: string, commit: string) {
+    console.log(sprintf('TEST updateHash host:%s repoName:%s commit:%s', hostname, repoName, commit))
+  }
+  deleteRepoRecord = function (repo: string) {
+    console.log(sprintf('TEST deleteRepoRecord repo:%s', repo))
+  }
+  fs.unlink = function (file: string) {
+    console.log(sprintf('TEST fs.unlink file:%s', file))
+  }
+}
 
 mainLoop()
 
@@ -87,10 +101,38 @@ function getLocalDirs () {
           if (RUN_SUBSET && !dir2[ f2 ].startsWith('ffff')) {
             continue
           }
+          // Check if directory is not base16 or 40 characters. If not AND the directory is empty or
+          // has no commits, then delete the directory and any record of it in the DB.
+          const repo = dir2[f2]
+          let emptyRepo = false
+          let invalidRepoName = false
+          if (!isHex(repo) || repo.length !== 40) {
+            invalidRepoName = true
+          }
+
           const path2 = path + '/' + dir2[ f2 ]
           const stat2 = fs.statSync(path2)
           if (stat2.isDirectory()) {
-            allDirs.push(dir2[ f2 ])
+            const stat3 = fs.statSync(path2 + '/objects')
+            if (stat3.isDirectory()) {
+              const objDir = fs.readdirSync(path2 + '/objects')
+              if (objDir.length === 0) {
+                emptyRepo = true
+              }
+            } else {
+              emptyRepo = true
+            }
+
+            if (emptyRepo && invalidRepoName) {
+              console.log('  Deleting invalid repo: ' + path2)
+              // Delete the directory
+              fs.unlink(path2)
+
+              // Remove from DB
+              deleteRepoRecord(repo)
+            } else {
+              allDirs.push(dir2[ f2 ])
+            }
           }
         }
       }

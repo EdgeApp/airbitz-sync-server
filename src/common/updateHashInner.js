@@ -66,4 +66,28 @@ async function insertDb (server, repo, hash: string | null, repoObj: any = {}) {
   })
 }
 
-module.exports = { updateHash }
+async function deleteRepoRecord (repo:string) {
+  // console.log('ENTER writeDb:' + repo + ' hash:' + hash)
+  return new Promise((resolve, reject) => {
+    _dbRepos.get(repo, function (err, response) {
+      if (err) {
+        if (err.error === 'not_found') {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      } else {
+        _dbRepos.destroy(repo, response.rev, (err, body) => {
+          if (err) {
+            console.log(err)
+            resolve(false)
+          } else {
+            resolve(true)
+          }
+        })
+      }
+    })
+  })
+}
+
+module.exports = { updateHash, deleteRepoRecord }
