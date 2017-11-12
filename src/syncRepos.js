@@ -3,12 +3,12 @@
  * @flow
  */
 
-import fs from 'fs'
-import { sprintf } from 'sprintf-js'
-import nano from 'nano'
-import { createRepo } from './common/createRepoInner.js'
-import { updateHash } from './common/updateHashInner.js'
-import {
+const fs = require('fs')
+const { sprintf } = require('sprintf-js')
+const nano = require('nano')
+const { createRepo } = require('./common/createRepoInner.js')
+const { updateHash } = require('./common/updateHashInner.js')
+const {
   getRepoPath,
   getReposDir,
   getFailedReposFileName,
@@ -17,7 +17,7 @@ import {
   snooze,
   getHostname,
   dateString
-} from './common/syncUtils.js'
+} = require('./common/syncUtils.js')
 
 const url = getCouchUrl()
 
