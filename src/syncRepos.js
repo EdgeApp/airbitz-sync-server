@@ -74,47 +74,48 @@ function shuffle (a: Array<any>) {
 }
 
 async function main () {
-  servers = await getServers()
-  const doc = await getRepos()
-  const array = doc.rows
-  let failArray = []
+  while (1) {
+    servers = await getServers()
+    const doc = await getRepos()
+    const array = doc.rows
+    let failArray = []
 
-  for (let n = 0; n < array.length; n++) {
-    const diff = array[n]
-    console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
-    if (typeof diff.value.servers !== 'undefined') {
-      continue
-    }
+    for (let n = 0; n < array.length; n++) {
+      const diff = array[n]
+      console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
+      if (typeof diff.value.servers !== 'undefined') {
+        continue
+      }
 
-    let syncedHash = null
-    shuffle(servers)
+      let syncedHash = null
+      shuffle(servers)
 
-    for (let s = 0; s < servers.length; s++) {
-      if (diff.id !== syncedHash) {
-        if (host !== servers[s].name) {
-          const ret = await pullRepoFromServer(diff.id, servers[s])
-          if (!ret) {
-            failArray.push(diff.id)
-          } else {
-            syncedHash = diff.id
+      for (let s = 0; s < servers.length; s++) {
+        if (diff.id !== syncedHash) {
+          if (host !== servers[s].name) {
+            const ret = await pullRepoFromServer(diff.id, servers[s])
+            if (!ret) {
+              failArray.push(diff.id)
+            } else {
+              syncedHash = diff.id
+            }
           }
         }
       }
     }
-  }
-  if (failArray.length) {
-    console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
-    console.log(failArray)
-    try {
-      fs.writeFileSync(getFailedReposFileName(), JSON.stringify(failArray))
-    } catch (e) {
-      console.log(e)
+    if (failArray.length) {
+      console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
+      console.log(failArray)
+      try {
+        fs.writeFileSync(getFailedReposFileName(), JSON.stringify(failArray))
+      } catch (e) {
+        console.log(e)
+      }
+    } else {
+      console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
     }
-  } else {
-    console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
+    await snooze(5000)
   }
-  await snooze(5000)
-  await main()
 }
 
 async function pullRepoFromServer (repoName, server, retry = true) {
