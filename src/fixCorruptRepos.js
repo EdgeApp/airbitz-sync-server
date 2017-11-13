@@ -77,6 +77,7 @@ async function getLocalDirs () {
 
   // If repolist.txt exists, use it. Otherwise, build up the list ourselves
   let allDirs = []
+  let numCorrupt = 0
 
   // const repolistFile = getRepoListFile()
   // const exists = fs.existsSync(repolistFile)
@@ -148,6 +149,7 @@ async function getLocalDirs () {
             }
 
             if (emptyRepo && invalidRepoName) {
+              numCorrupt++
               console.log('  Archiving invalid repo: ' + path2)
               try {
                 moveRepoToBackup(repo)
@@ -166,5 +168,6 @@ async function getLocalDirs () {
     }
   }
   console.log('  num repos:' + allDirs.length)
+  console.log('  num corrupt:' + numCorrupt)
   return allDirs
 }
