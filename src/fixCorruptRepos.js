@@ -150,7 +150,7 @@ async function getLocalDirs () {
 
             if (emptyRepo && invalidRepoName) {
               numCorrupt++
-              console.log('  Archiving invalid repo: ' + path2)
+              console.log(sprintf('  %d Archiving invalid repo: %s', numCorrupt, path2))
               try {
                 moveRepoToBackup(repo)
               } catch (e) {}
