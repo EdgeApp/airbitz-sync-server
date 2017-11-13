@@ -7,13 +7,17 @@ const childProcess = require('child_process')
 const { sprintf } = require('sprintf-js')
 
 // $FlowFixMe
-const config = require('/etc/syncConfig.json')
+const config = require('../../syncConfig.json')
 
 const rootDir = config.userDir + config.reposDir
 
 function isHex (h: string) {
   const a = parseInt(h, 16)
   return (a.toString(16) === h)
+}
+
+function getConfig () {
+  return config
 }
 
 function getAuthBackupsDir () {
@@ -101,5 +105,6 @@ module.exports = {
   getCouchUrl,
   getFailedReposFileName,
   getRepoPath,
+  getConfig,
   isHex
 }

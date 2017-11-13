@@ -4,10 +4,9 @@
  */
 
 import fs from 'fs'
-import { getReposDir, getRepoPath } from './common/syncUtils.js'
+import { getReposDir, getRepoPath, getConfig } from './common/syncUtils.js'
 
-// $FlowFixMe
-const config = require('/etc/syncConfig.json')
+const config = getConfig()
 // $FlowFixMe
 const repos = require(config.userDir + config.failedRepos)
 

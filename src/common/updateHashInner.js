@@ -3,8 +3,8 @@
  * @flow
  */
 
-// $FlowFixMe
-const config = require('/etc/syncConfig.json')
+const { getConfig } = require('./syncUtils.js')
+const config = getConfig()
 const sprintf = require('sprintf-js').sprintf
 const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
 const nano = require('nano')(url)
