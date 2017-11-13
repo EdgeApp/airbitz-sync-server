@@ -32,11 +32,13 @@ Update a specific repos hash for a specific server in CouchDB
 
     node lib/updateHash.js [server] [repo] [hash]
 
+## The following should be run as background services
+
+These should be run in the background using a daemon such as `forever-service`
+
 Loop over all repos and update the DB with their current hash.
 
     node lib/updateReposHashes.js
-
-## The following should be run as background services
 
 This is the most important script in this repo. This script will run in the background and query CouchDB looking for repos in remote servers that need to be sync'ed with the local server. Must be run as a service in the background
 
@@ -46,3 +48,25 @@ Prune Auth server backups. This will loop and prune excessive backups
 
     node lib/pruneBackups.js
 
+### Run all the background scripts using `forever-service`
+
+    cd /home/bitz/code/airbitz-sync-server/lib
+    sudo forever-service install fixStuck -r bitz --script fixStuck.js  --start
+    sudo forever-service install gcRepos -r bitz --script gcRepos.js  --start
+    sudo forever-service install syncRepos -r bitz --script syncRepos.js  --start
+    sudo forever-service install pruneBackups -r bitz --script pruneBackups.js  --start
+
+### Delete the background daemons
+
+    sudo forever-service delete syncRepos
+    sudo forever-service delete fixStuck
+    sudo forever-service delete gcRepos
+    sudo forever-service delete pruneBackups
+
+### Restart the background process scripts
+
+    sudo service syncRepos restart
+    sudo service fixStuck restart
+    sudo service gcRepos restart
+    sudo service pruneBackups restart
+    sudo systemctl restart couchdb
