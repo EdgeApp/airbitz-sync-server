@@ -1,0 +1,13 @@
+#!/bin/sh
+
+GITCMD="/usr/bin/git"
+
+chash=$($GITCMD rev-parse HEAD)
+repo=${PWD##*/}
+
+hname=$(hostname)
+
+node /home/bitz/code/airbitz-sync-server/src/update_hash_cli.js ${hname} ${repo} ${chash}
+
+curl "http://localhost:8000/api/v1/repo/sync/${repo}"
+
