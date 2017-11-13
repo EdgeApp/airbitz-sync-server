@@ -4,7 +4,7 @@ const fs = require('fs')
 const { sprintf } = require('sprintf-js')
 const childProcess = require('child_process')
 
-let { updateHash, deleteRepoRecord } = require('./common/updateHashInner.js')
+let { updateHash } = require('./common/updateHashInner.js')
 let {
   getRepoPath,
   dateString,
@@ -21,14 +21,15 @@ console.log(dateString() + ' updateReposHashes.js starting')
 
 const hostname = getHostname()
 
-const TEST_ONLY = true // Set to true to not execute any disk write functions
+const TEST_ONLY = false // Set to true to not execute any disk write functions
 
 if (TEST_ONLY) {
-  updateHash = function (hostname: string, repoName: string, commit: string) {
-    console.log(sprintf('TEST updateHash host:%s repoName:%s commit:%s', hostname, repoName, commit))
-  }
-  deleteRepoRecord = function (repo: string) {
-    console.log(sprintf('TEST deleteRepoRecord repo:%s', repo))
+  updateHash = function (hostname: string, repoName: string, hash: string | null) {
+    let p = hash
+    if (!hash) {
+      p = 'null'
+    }
+    console.log(sprintf('TEST updateHash host:%s repoName:%s hash:%s', hostname, repoName, p))
   }
   moveRepoToBackup = function (repo: string) {
     console.log(sprintf('TEST moveRepoToBackup repo:%s', repo))
@@ -41,7 +42,7 @@ if (TEST_ONLY) {
 mainLoop()
 
 async function mainLoop () {
-  const localRepos = getLocalDirs()
+  const localRepos = await getLocalDirs()
   console.log('localRepos:' + localRepos.length)
 
   let n = 0
@@ -80,7 +81,7 @@ function repoListToArray (repolistfile) {
   return remoteRepoList
 }
 
-function getLocalDirs () {
+async function getLocalDirs () {
   console.log('ENTER getLocalDirs')
 
   // If repolist.txt exists, use it. Otherwise, build up the list ourselves
@@ -161,7 +162,7 @@ function getLocalDirs () {
               } catch (e) {}
 
               // Remove from DB
-              deleteRepoRecord(repo)
+              await updateHash(hostname, repo, null)
             } else {
               allDirs.push(dir2[ f2 ])
             }
