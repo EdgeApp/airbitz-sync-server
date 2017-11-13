@@ -5,19 +5,36 @@
 
 const childProcess = require('child_process')
 const { sprintf } = require('sprintf-js')
-
-// $FlowFixMe
 const config = require('../../syncConfig.json')
+const fs = require('fs')
 
 const rootDir = config.userDir + config.reposDir
 
 function isHex (h: string) {
-  const a = parseInt(h, 16)
-  return (a.toString(16) === h)
+  const out = /^[0-9A-F]+$/i.test(h)
+  return out
+}
+
+function parseIntSafe (result?: Array<string> | null, idx: number): number {
+  if (result && result[idx]) {
+    return parseInt(result[idx])
+  } else {
+    throw new Error('InvalidParseResult')
+  }
 }
 
 function getConfig () {
   return config
+}
+
+function moveRepoToBackup (repoName: string) {
+  const localPath = getRepoPath(repoName)
+  const newdir = getReposDir() + '.bak/' + repoName
+  try {
+    fs.renameSync(localPath, newdir)
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 function getAuthBackupsDir () {
@@ -102,6 +119,8 @@ module.exports = {
   getRepoListFile,
   getHostname,
   getRepoSubdir,
+  parseIntSafe,
+  moveRepoToBackup,
   getCouchUrl,
   getFailedReposFileName,
   getRepoPath,

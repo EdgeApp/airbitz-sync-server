@@ -4,6 +4,7 @@
  */
 
 const { sprintf } = require('sprintf-js')
+const { parseIntSafe } = require('./syncUtils.js')
 
 function monthDiff (d1: Date, d2: Date) {
   let months
@@ -42,14 +43,6 @@ function getWeekNumber (inDate) {
 
 function arrayDiff (b, a) {
   return b.filter(function (i) { return a.indexOf(i) < 0 })
-}
-
-function parseIntSafe (result?: Array<string> | null, idx: number): number {
-  if (result && result[idx]) {
-    return parseInt(result[idx])
-  } else {
-    throw new Error('InvalidParseResult')
-  }
 }
 
 export type PruneFilesParams = {

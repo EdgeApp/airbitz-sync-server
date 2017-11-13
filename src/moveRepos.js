@@ -3,20 +3,12 @@
  * @flow
  */
 
-import fs from 'fs'
-import { getReposDir, getRepoPath, getConfig } from './common/syncUtils.js'
+import { getConfig, moveRepoToBackup } from './common/syncUtils.js'
 
 const config = getConfig()
 // $FlowFixMe
 const repos = require(config.userDir + config.failedRepos)
 
-for (const n in repos) {
-  const repoName = repos[n]
-  const localPath = getRepoPath(repoName)
-  const newdir = getReposDir() + '.bak/' + repoName
-  try {
-    fs.renameSync(localPath, newdir)
-  } catch (e) {
-    console.log(e)
-  }
+for (const repo of repos) {
+  moveRepoToBackup(repo)
 }
