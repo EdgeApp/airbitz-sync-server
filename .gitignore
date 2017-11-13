@@ -16,3 +16,4 @@ node_modules/
 *-ck.js
 
 lib/
+test/
