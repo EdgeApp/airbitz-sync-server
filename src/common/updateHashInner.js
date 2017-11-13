@@ -3,7 +3,7 @@
  * @flow
  */
 
-const { getConfig } = require('./syncUtils.js')
+const { getConfig, isReservedRepoName } = require('./syncUtils.js')
 const config = getConfig()
 const sprintf = require('sprintf-js').sprintf
 const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
@@ -66,4 +66,31 @@ async function insertDb (server, repo, hash: string | null, repoObj: any = {}) {
   })
 }
 
-module.exports = { updateHash }
+async function deleteRepoRecord (repo:string) {
+  console.log('deleteRepoRecord: ' + repo)
+  return new Promise((resolve, reject) => {
+    if (isReservedRepoName(repo)) {
+      resolve(true)
+    }
+    _dbRepos.get(repo, function (err, response) {
+      if (err) {
+        if (err.error === 'not_found') {
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      } else {
+        _dbRepos.destroy(repo, response._rev, (err, body) => {
+          if (err) {
+            console.log(err)
+            resolve(false)
+          } else {
+            resolve(true)
+          }
+        })
+      }
+    })
+  })
+}
+
+module.exports = { updateHash, deleteRepoRecord }

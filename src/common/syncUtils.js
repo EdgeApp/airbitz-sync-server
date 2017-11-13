@@ -23,6 +23,10 @@ function parseIntSafe (result?: Array<string> | null, idx: number): number {
   }
 }
 
+function isReservedRepoName (repoName: string) {
+  return (repoName === '00000000_servers')
+}
+
 function getConfig () {
   return config
 }
@@ -125,5 +129,6 @@ module.exports = {
   getFailedReposFileName,
   getRepoPath,
   getConfig,
+  isReservedRepoName,
   isHex
 }
