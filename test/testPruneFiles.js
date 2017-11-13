@@ -1,10 +1,11 @@
 /**
  * Created by paul on 8/2/17.
- * @flow
+ *      
  */
 
-import { type PruneFilesParams, pruneFiles } from '../src/common/pruneBackupsInner.js'
-import { sprintf } from 'sprintf-js'
+                                                                          
+const { pruneFiles } = require('../lib/common/pruneBackupsInner.js')
+const { sprintf } = require('sprintf-js')
 
 const NUM_DAYS_HOURLY_BACKUP = 1
 const NUM_MONTHS_DAILY_BACKUP = 1
@@ -27,7 +28,7 @@ for (let y = 2016; y <= 2017; y++) {
   }
 }
 
-const pruneFilesParams: PruneFilesParams = {
+const pruneFilesParams                   = {
   currentDate: null,
   files: testFiles,
   numDaysHourly: NUM_DAYS_HOURLY_BACKUP,
