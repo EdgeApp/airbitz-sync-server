@@ -113,8 +113,8 @@ function getLocalDirs () {
           const path2 = path + '/' + dir2[ f2 ]
           const stat2 = fs.statSync(path2)
           if (stat2.isDirectory()) {
-            const stat3 = fs.statSync(path2 + '/objects')
-            if (stat3.isDirectory()) {
+            const objectsDirStat = fs.statSync(path2 + '/objects')
+            if (objectsDirStat.isDirectory()) {
               const objDir = fs.readdirSync(path2 + '/objects')
               if (objDir.length === 0) {
                 emptyRepo = true
@@ -122,17 +122,20 @@ function getLocalDirs () {
             } else {
               emptyRepo = true
             }
-
-            if (emptyRepo && invalidRepoName) {
-              console.log('  Deleting invalid repo: ' + path2)
-              // Delete the directory
+          } else {
+            emptyRepo = true
+          }
+          if (emptyRepo && invalidRepoName) {
+            console.log('  Deleting invalid repo: ' + path2)
+            // Delete the directory
+            try {
               fs.unlink(path2)
+            } catch (e) {}
 
-              // Remove from DB
-              deleteRepoRecord(repo)
-            } else {
-              allDirs.push(dir2[ f2 ])
-            }
+            // Remove from DB
+            deleteRepoRecord(repo)
+          } else {
+            allDirs.push(dir2[ f2 ])
           }
         }
       }
