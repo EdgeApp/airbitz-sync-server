@@ -12,7 +12,7 @@ async function main () {
   try {
     const host = getHostname()
 
-    if (createRepo(process.argv[2]) === -1) {
+    if (await createRepo(process.argv[2]) === -1) {
       process.exit(-1)
     }
     await updateHash(host, process.argv[2], 'HEAD')

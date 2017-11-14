@@ -3,10 +3,13 @@
  * @flow
  */
 
+const util = require('util')
 const childProcess = require('child_process')
 const { sprintf } = require('sprintf-js')
 const config = require('../../syncConfig.json')
 const fs = require('fs')
+// $FlowFixMe
+const execFile = util.promisify(childProcess.execFile)
 
 const rootDir = config.userDir + config.reposDir
 
@@ -112,11 +115,26 @@ function easyEx (path: string | null, cmdstring: string): string {
   return r
 }
 
+async function easyExAsync (path: string | null, cmdstring: string): Promise<string> {
+  const cmdArray = cmdstring.split(' ')
+  const cmd = cmdArray[0]
+  const args = cmdArray.slice(1, cmdArray.length)
+
+  let opts
+  if (path) {
+    opts = { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' }
+  } else {
+    opts = { encoding: 'utf8', timeout: 20000, killSignal: 'SIGKILL' }
+  }
+  const r: string = await execFile(cmd, args, opts)
+  return r
+}
 // createRepo('12lakjaweoigjaoewigjaogji')
 
 module.exports = {
   getAuthBackupsDir,
   easyEx,
+  easyExAsync,
   snooze,
   dateString,
   getReposDir,

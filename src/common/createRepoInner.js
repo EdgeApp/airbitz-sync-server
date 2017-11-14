@@ -3,16 +3,22 @@
  * @flow
  */
 
+const util = require('util')
 const fs = require('fs')
 const mkdirp = require('mkdirp')
-const { getRepoPath, easyEx } = require('./syncUtils.js')
+const { getRepoPath, easyExAsync } = require('./syncUtils.js')
 
-function createRepo (repo: string) {
+// $FlowFixMe
+const fsstat = util.promisify(fs.stat)
+// $FlowFixMe
+const mkdirpp = util.promisify(mkdirp)
+
+async function createRepo (repo: string) {
   const fullPath = getRepoPath(repo)
   let stat = null
 
   try {
-    stat = fs.statSync(fullPath)
+    stat = await fsstat(fullPath)
     if (stat.isFile()) {
       console.log('File found in repo location')
       return -1
@@ -24,25 +30,25 @@ function createRepo (repo: string) {
 
   if (stat === null) {
     try {
-      mkdirp.sync(fullPath)
+      await mkdirpp(fullPath)
     } catch (e) {
       return -1
     }
   }
 
   try {
-    easyEx(fullPath, 'git init --bare')
+    await easyExAsync(fullPath, 'git init --bare')
   } catch (e) {
     // don't care if this fails
   }
 
   try {
-    easyEx(fullPath, 'git config --file config http.receivepack true')
-    easyEx(fullPath, 'git config receive.denyDeletes true')
-    easyEx(fullPath, 'git config receive.denyNonFastForwards true')
-    easyEx(fullPath, 'rm -rf hooks')
-    easyEx(fullPath, 'rm -f description')
-    easyEx(fullPath, 'ln -s /etc/absync/hooks')
+    await easyExAsync(fullPath, 'git config --file config http.receivepack true')
+    await easyExAsync(fullPath, 'git config receive.denyDeletes true')
+    await easyExAsync(fullPath, 'git config receive.denyNonFastForwards true')
+    await easyExAsync(fullPath, 'rm -rf hooks')
+    await easyExAsync(fullPath, 'rm -f description')
+    await easyExAsync(fullPath, 'ln -s /etc/absync/hooks')
     // const cmd = sprintf('chown -R %s:%s .', config.user, config.group)
     // easyEx(fullPath, cmd)
   } catch (e) {

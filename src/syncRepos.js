@@ -3,7 +3,8 @@
  * @flow
  */
 
-const fs = require('fs')
+const util = require('util')
+const fsCallback = require('fs')
 const { sprintf } = require('sprintf-js')
 const nano = require('nano')
 const { createRepo } = require('./common/createRepoInner.js')
@@ -13,11 +14,15 @@ const {
   getReposDir,
   getFailedReposFileName,
   getCouchUrl,
-  easyEx,
+  easyExAsync,
   snooze,
   getHostname,
   dateString
 } = require('./common/syncUtils.js')
+// $FlowFixMe
+const writeFile = util.promisify(fsCallback.writeFile)
+// $FlowFixMe
+const rename = util.promisify(fsCallback.rename)
 
 const url = getCouchUrl()
 
@@ -73,6 +78,24 @@ function shuffle (a: Array<any>) {
   }
 }
 
+async function syncRepoAllServers (repo: string, servers: any, failArray: Array<string>) {
+  // console.log('Pulling repo:' + repo)
+  // await snooze(5000)
+  // console.log('Done pulling repo:' + repo)
+  shuffle(servers)
+  // let syncedHash = null
+  for (let s = 0; s < servers.length; s++) {
+    if (host !== servers[s].name) {
+      const ret = await pullRepoFromServer(repo, servers[s])
+      if (!ret) {
+        failArray.push(repo)
+      }
+    }
+  }
+}
+
+const QUEUE_SIZE = 4
+
 async function main () {
   while (1) {
     servers = await getServers()
@@ -80,6 +103,7 @@ async function main () {
     const array = doc.rows
     let failArray = []
 
+    let promiseArray = []
     for (let n = 0; n < array.length; n++) {
       const diff = array[n]
       console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
@@ -87,27 +111,22 @@ async function main () {
         continue
       }
 
-      let syncedHash = null
-      shuffle(servers)
-
-      for (let s = 0; s < servers.length; s++) {
-        if (diff.id !== syncedHash) {
-          if (host !== servers[s].name) {
-            const ret = await pullRepoFromServer(diff.id, servers[s])
-            if (!ret) {
-              failArray.push(diff.id)
-            } else {
-              syncedHash = diff.id
-            }
-          }
-        }
+      if (promiseArray.length > QUEUE_SIZE) {
+        const pr = promiseArray.shift()
+        await pr.then()
       }
+
+      const p = syncRepoAllServers(diff.id, servers, failArray)
+      promiseArray.push(p)
     }
+
+    await Promise.all(promiseArray)
+
     if (failArray.length) {
       console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
       console.log(failArray)
       try {
-        fs.writeFileSync(getFailedReposFileName(), JSON.stringify(failArray))
+        await writeFile(getFailedReposFileName(), JSON.stringify(failArray))
       } catch (e) {
         console.log(e)
       }
@@ -125,12 +144,12 @@ async function pullRepoFromServer (repoName, server, retry = true) {
   const log = sprintf('%s:%s pullRepoFromServer:%s %s', date.toDateString(), date.toTimeString(), server.name, repoName)
   console.log(log)
 
-  createRepo(repoName)
+  await createRepo(repoName)
 
   const status = {'branch': false, 'absync': false, 'find': false, 'push': false, 'writedb': false}
 
   try {
-    easyEx(localPath, 'git branch -D incoming')
+    await easyExAsync(localPath, 'git branch -D incoming')
     status.branch = true
   } catch (e) {
   }
@@ -138,28 +157,28 @@ async function pullRepoFromServer (repoName, server, retry = true) {
   let retval = ''
   try {
     let cmd = sprintf('ab-sync %s %s', localPath, serverPath)
-    easyEx(localPath, cmd)
+    await easyExAsync(localPath, cmd)
     status.absync = true
 
-    retval = easyEx(localPath, 'find objects -type f')
+    retval = await easyExAsync(localPath, 'find objects -type f')
     status.find = true
 
     // Mark the backup directory for deletion
     if (!retry) {
       try {
         const bakdir = getReposDir() + '.bak/' + repoName
-        fs.renameSync(bakdir, bakdir + '.deleteme')
+        await rename(bakdir, bakdir + '.deleteme')
       } catch (e) {
       }
     }
 
     if (retval.length > 0) {
       cmd = sprintf('git push %s master', serverPath)
-      easyEx(localPath, cmd)
+      await easyExAsync(localPath, cmd)
       status.push = true
     }
 
-    retval = easyEx(localPath, 'git rev-parse HEAD')
+    retval = await easyExAsync(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
     console.log(sprintf('  FAILED: %s', repoName))
