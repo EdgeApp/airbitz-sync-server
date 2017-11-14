@@ -78,17 +78,25 @@ function shuffle (a: Array<any>) {
   }
 }
 
-async function syncRepoAllServers (repo: string, servers: any, failArray: Array<string>) {
-  // console.log('Pulling repo:' + repo)
-  // await snooze(5000)
-  // console.log('Done pulling repo:' + repo)
+async function syncRepoAllServers (diff: any, servers: any, failArray: Array<string>) {
   shuffle(servers)
-  // let syncedHash = null
+  let syncedHash: string = ''
+  const repo = diff.id
+  const hashMap = diff.value
   for (let s = 0; s < servers.length; s++) {
-    if (host !== servers[s].name) {
-      const ret = await pullRepoFromServer(repo, servers[s])
-      if (!ret) {
-        failArray.push(repo)
+    const serverName = servers[s].name
+    if (syncedHash !== hashMap[serverName]) {
+      if (host !== serverName) {
+        // console.log('Pulling repo:' + repo + ' hash:' + hashMap[serverName])
+        // await snooze(5000)
+        // console.log('Done pulling repo:' + repo)
+        // const ret = true
+        const ret = await pullRepoFromServer(repo, servers[s])
+        if (!ret) {
+          failArray.push(repo)
+        } else {
+          syncedHash = hashMap[serverName]
+        }
       }
     }
   }
@@ -116,7 +124,7 @@ async function main () {
         await pr.then()
       }
 
-      const p = syncRepoAllServers(diff.id, servers, failArray)
+      const p = syncRepoAllServers(diff, servers, failArray)
       promiseArray.push(p)
     }
 
