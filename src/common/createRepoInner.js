@@ -1,28 +1,13 @@
 /**
  * Created by paul on 6/18/17.
+ * @flow
  */
+
 const fs = require('fs')
 const mkdirp = require('mkdirp')
-const sprintf = require('sprintf-js').sprintf
-const childProcess = require('child_process')
-const config = require('/etc/sync_repos.config.json')
-const rootDir = config.userDir + config.reposDir
+const { getRepoPath, easyEx } = require('./syncUtils.js')
 
-function getRepoPath (repo) {
-  const fullPath = rootDir + '/' + repo.slice(0, 2) + '/' + repo
-  return fullPath
-}
-
-function getRepoSubdir (repo) {
-  const fullPath = rootDir + '/' + repo.slice(0, 2)
-  return fullPath
-}
-
-function getReposDir () {
-  return rootDir
-}
-
-function createRepo (repo) {
+function createRepo (repo: string) {
   const fullPath = getRepoPath(repo)
   let stat = null
 
@@ -68,16 +53,4 @@ function createRepo (repo) {
   return true
 }
 
-function easyEx (path, cmdstring) {
-  const cmdArray = cmdstring.split(' ')
-  const cmd = cmdArray[0]
-  const args = cmdArray.slice(1, cmdArray.length)
-  const r = childProcess.execFileSync(cmd, args, { timeout: 20000, cwd: path, killSignal: 'SIGKILL' })
-  return r
-}
-
-// createRepo('12lakjaweoigjaoewigjaogji')
-module.exports.createRepo = createRepo
-module.exports.getRepoPath = getRepoPath
-module.exports.getRepoSubdir = getRepoSubdir
-module.exports.getReposDir = getReposDir
+module.exports = { createRepo }

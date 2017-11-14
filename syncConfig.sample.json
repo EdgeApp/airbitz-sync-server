@@ -4,5 +4,6 @@
   "userDir": "/home/bitz/",
   "reposDir": "www/repos",
   "failedRepos": "failedRepos.json",
-  "repoListPath": "/home/readuser/"
+  "repoListPath": "/home/readuser/",
+  "authBackupsDir": "/home/bitz/backups/"
 }

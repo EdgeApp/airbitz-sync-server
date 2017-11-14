@@ -1,28 +1,25 @@
 /**
  * Created by paul on 6/17/17.
+ * @flow
  */
-const config = require('/etc/sync_repos.config.json')
 const sprintf = require('sprintf-js').sprintf
-const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
+const { getCouchUrl } = require('./common/syncUtils.js')
+const url = getCouchUrl()
 const nano = require('nano')(url)
-const _writeDb = require('./update_hash.js').writeDb
+const { updateHash } = require('./common/updateHashInner.js')
 const _dbRepos = nano.db.use('db_repos')
 
 async function mainLoop () {
   if (process.argv.length < 3) {
-    console.log('Usage: delete_server_cli.js [server]')
+    console.log('Usage: deleteServer.js [server]')
     return -1
   } else {
     const repos = await getRepos()
 
-    for (const i in repos.rows) {
-      const repo = repos.rows[i]
+    for (const repo of repos.rows) {
       console.log(sprintf('Deleting %s from repo %s', process.argv[2], repo.key))
-      await _writeDb(process.argv[2], repo.key, null)
+      await updateHash(process.argv[2], repo.key, null)
     }
-
-
-    // await _writeDb(process.argv[2])
   }
 }
 
@@ -39,4 +36,3 @@ async function getRepos () {
     })
   })
 }
-

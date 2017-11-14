@@ -15,3 +15,6 @@ node_modules/
 # codekit
 *-ck.js
 
+lib/
+test/
+syncConfig.json
