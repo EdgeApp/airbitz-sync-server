@@ -3,13 +3,10 @@
  * @flow
  */
 
-const util = require('util')
 const childProcess = require('child_process')
 const { sprintf } = require('sprintf-js')
 const config = require('../../syncConfig.json')
 const fs = require('fs')
-// $FlowFixMe
-const execFile = util.promisify(childProcess.execFile)
 
 const rootDir = config.userDir + config.reposDir
 
@@ -115,7 +112,7 @@ function easyEx (path: string | null, cmdstring: string): string {
   return r
 }
 
-async function easyExAsync (path: string | null, cmdstring: string): Promise<string> {
+function easyExAsync (path: string | null, cmdstring: string) {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
@@ -126,8 +123,15 @@ async function easyExAsync (path: string | null, cmdstring: string): Promise<str
   } else {
     opts = { encoding: 'utf8', timeout: 20000, killSignal: 'SIGKILL' }
   }
-  const r: string = await execFile(cmd, args, opts)
-  return r
+  return new Promise((resolve, reject) => {
+    childProcess.execFile(cmd, args, opts, function (err, stdout, stderr) {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(stdout)
+      }
+    })
+  })
 }
 // createRepo('12lakjaweoigjaoewigjaogji')
 

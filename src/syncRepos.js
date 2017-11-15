@@ -190,6 +190,7 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     }
 
     retval = await easyExAsync(localPath, 'git rev-parse HEAD')
+    // $FlowFixMe
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
     console.log(sprintf('  FAILED: %s', repoName))
