@@ -83,6 +83,7 @@ async function syncRepoAllServers (diff: any, servers: any, failArray: Array<str
   let syncedHash: string = ''
   const repo = diff.id
   const hashMap = diff.value
+  let success = false
   for (let s = 0; s < servers.length; s++) {
     const serverName = servers[s].name
     if (syncedHash !== hashMap[serverName]) {
@@ -92,13 +93,15 @@ async function syncRepoAllServers (diff: any, servers: any, failArray: Array<str
         // console.log('Done pulling repo:' + repo)
         // const ret = true
         const ret = await pullRepoFromServer(repo, servers[s])
-        if (!ret) {
-          failArray.push(repo)
-        } else {
+        if (ret) {
+          success = true
           syncedHash = hashMap[serverName]
         }
       }
     }
+  }
+  if (!success) {
+    failArray.push(repo)
   }
 }
 
