@@ -1,7 +1,7 @@
 {
   "name": "airbitz-sync-server",
   "version": "1.0.0",
-  "description": "Git server wrapper",
+  "description": "Airbitz git sync server",
   "main": "none.js",
   "scripts": {
     "build": "flow-remove-types src/ -d lib/ && flow-remove-types testsrc/ -d test/",
@@ -13,7 +13,10 @@
     "prepare": "npm run build"
   },
   "keywords": [],
-  "author": "Paul Puey <paul@edgesecure.co",
+  "author": "Edge (Airbitz Inc)",
+  "contributors": [
+    "Paul Puey <paul@edgesecure.co>"
+  ],
   "license": "ISC",
   "devDependencies": {
     "babel-eslint": "^8.0.2",
