@@ -1,0 +1,15 @@
+{
+  "_id": "_design/repos",
+  "language": "javascript",
+  "views": {
+    "git2": {
+      "map": "function (doc) {\n  const me = 'git2'\n  if (typeof doc.servers !== 'undefined')\n    return\n  if (typeof doc[me] === 'undefined') {\n    emit(null, doc)\n    return\n  }\n  const servers = ['git2', 'git3']\n  for (var n = 0; n < servers.length; n++) {\n    const serv1 = servers[ n ]\n    if (me === serv1) continue\n    if (typeof doc[ serv1 ] === 'undefined') continue\n\n    var doEmit = false\n    if (doc[ me ] !== doc[ serv1 ]) {\n      doEmit = true\n    }\n\n    if (typeof doc[ me + ':time'] !== 'undefined') {\n      if (typeof doc[ serv1 + ':time'] !== 'undefined') {\n        if (doc[ me + ':time'] > doc[ serv1 + ':time' ]) {\n          doEmit = false\n        }\n      } else {\n        doEmit = false\n      }\n    }\n\n    if (doEmit === true)\n      emit(null, doc)\n    return\n  }\n}\n"
+    },
+    "git3": {
+      "map": "function (doc) {\n  const me = 'git3'\n  if (typeof doc.servers !== 'undefined')\n    return\n  if (typeof doc[me] === 'undefined') {\n    emit(null, doc)\n    return\n  }\n  const servers = ['git2', 'git3']\n  for (var n = 0; n < servers.length; n++) {\n    const serv1 = servers[ n ]\n    if (me === serv1) continue\n    if (typeof doc[ serv1 ] === 'undefined') continue\n\n    var doEmit = false\n    if (doc[ me ] !== doc[ serv1 ]) {\n      doEmit = true\n    }\n\n    if (typeof doc[ me + ':time'] !== 'undefined') {\n      if (typeof doc[ serv1 + ':time'] !== 'undefined') {\n        if (doc[ me + ':time'] > doc[ serv1 + ':time' ]) {\n          doEmit = false\n        }\n      } else {\n        doEmit = false\n      }\n    }\n\n    if (doEmit === true)\n      emit(null, doc)\n    return\n  }\n}\n"
+    },
+    "git4": {
+      "map": "function (doc) {\n  const me = 'git4'\n  if (typeof doc.servers !== 'undefined')\n    return\n  if (typeof doc[me] === 'undefined') {\n    emit(null, doc)\n    return\n  }\n  const servers = ['git2', 'git3', 'git4']\n  for (var n = 0; n < servers.length; n++) {\n    const serv1 = servers[ n ]\n    if (me === serv1) continue\n    if (typeof doc[ serv1 ] === 'undefined') continue\n\n    var doEmit = false\n    if (doc[ me ] !== doc[ serv1 ]) {\n      doEmit = true\n    }\n\n    if (typeof doc[ me + ':time'] !== 'undefined') {\n      if (typeof doc[ serv1 + ':time'] !== 'undefined') {\n        if (doc[ me + ':time'] > doc[ serv1 + ':time' ]) {\n          doEmit = false\n        }\n      } else {\n        doEmit = false\n      }\n    }\n\n    if (doEmit === true)\n      emit(null, doc)\n    return\n  }\n}\n"
+    }
+  }
+}

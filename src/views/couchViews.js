@@ -1,3 +1,10 @@
+//
+// CouchDB javascript code to define a view that filters which repos need to be synced by which server.
+// Copy this into a design view in CouchDB to enable a view for a specific server
+//
+// This is formatted as JSON in couchViews.json for each copy/paste into a new git cluster
+//
+
 // function (doc) {
 //   const me = 'git2'
 //   if (typeof doc.servers !== 'undefined')
