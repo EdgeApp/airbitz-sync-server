@@ -105,7 +105,7 @@ async function syncRepoAllServers (diff: any, servers: any, failArray: Array<str
   }
 }
 
-const QUEUE_SIZE = 8
+const QUEUE_SIZE = 32
 
 async function main () {
   while (1) {
