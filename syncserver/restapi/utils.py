@@ -5,7 +5,7 @@ from django.conf import settings
 
 # We can change this
 EXE_PATH="/usr/bin/create_ab_repo.sh"
-JS_PATH="/home/bitz/code/airbitz-sync-server/src/create_repo_cli.js"
+JS_PATH="/home/bitz/code/airbitz-sync-server/lib/createRepo.js"
 
 def create_repo(repo_name):
     try:
