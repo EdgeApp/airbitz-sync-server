@@ -136,13 +136,13 @@ async function main () {
     if (failArray.length) {
       console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
       console.log(failArray)
-      try {
-        await writeFile(getFailedReposFileName(), JSON.stringify(failArray))
-      } catch (e) {
-        console.log(e)
-      }
     } else {
       console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
+    }
+    try {
+      await writeFile(getFailedReposFileName(), JSON.stringify(failArray))
+    } catch (e) {
+      console.log(e)
     }
     await snooze(5000)
   }
