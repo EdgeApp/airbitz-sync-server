@@ -171,8 +171,13 @@ async function pullRepoFromServer (repoName, server, retry = true) {
     await easyExAsync(localPath, cmd)
     status.absync = true
 
-    retval = await easyExAsync(localPath, 'find objects -type f')
-    status.find = true
+    try {
+      retval = await easyExAsync(localPath, 'find objects -type f')
+      status.find = true
+    } catch (e) {
+      status.find = true
+      retval = 'hasfile'
+    }
 
     // Mark the backup directory for deletion
     if (!retry) {
