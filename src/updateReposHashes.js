@@ -22,6 +22,9 @@ console.log(dateString() + ' updateReposHashes.js starting')
 const hostname = getHostname()
 
 const TEST_ONLY = false // Set to true to not execute any disk write functions
+const MOVE_INVALID_REPOS = true
+const RUN_SUBSET = false
+const SUBSET_PREFIX = 'ffff'
 
 if (TEST_ONLY) {
   updateHash = function (hostname: string, repoName: string, hash: string | null) {
@@ -98,11 +101,10 @@ async function getLocalDirs () {
     const reposDir = getReposDir()
     console.log('  Finding all local repos in: ' + reposDir)
     const dir = fs.readdirSync(reposDir)
-    const RUN_SUBSET = false
 
     for (let f = 0; f < dir.length; f++) {
       // For testing only look for 'wa...' directories which are testing only
-      if (RUN_SUBSET && !dir[ f ].startsWith('ff')) {
+      if (RUN_SUBSET && !dir[ f ].startsWith(SUBSET_PREFIX.slice(0, 2))) {
         continue
       }
 
@@ -113,7 +115,7 @@ async function getLocalDirs () {
           const dir2 = fs.readdirSync(path)
           for (let f2 = 0; f2 < dir2.length; f2++) {
             // For testing only look for 'wa...' directories which are testing only
-            if (RUN_SUBSET && !dir2[ f2 ].startsWith('ffff')) {
+            if (RUN_SUBSET && !dir2[ f2 ].startsWith(SUBSET_PREFIX)) {
               continue
             }
             // Check if directory is not base16 or 40 characters. If not AND the directory is empty or
@@ -155,14 +157,14 @@ async function getLocalDirs () {
               }
             }
 
-            if (emptyRepo && invalidRepoName) {
+            if (MOVE_INVALID_REPOS && emptyRepo && invalidRepoName) {
               console.log('  Archiving invalid repo: ' + path2)
               try {
                 moveRepoToBackup(repo)
               } catch (e) {}
 
               // Remove from DB
-              await updateHash(hostname, repo, null)
+              // await updateHash(hostname, repo, null)
             } else {
               allDirs.push(dir2[ f2 ])
             }
