@@ -41,8 +41,8 @@ function getWeekNumber (inDate) {
   return weekNo
 }
 
-function arrayDiff (b, a) {
-  return b.filter(function (i) { return a.indexOf(i) < 0 })
+function arrayDiff (b: any, a: any) {
+  return b.filter((i: any) => { return a.indexOf(i) < 0 })
 }
 
 export type PruneFilesParams = {

@@ -26,7 +26,7 @@ async function main () {
     console.log(dateString())
 
     let backupFiles = []
-// const backupDir = '/var/www/html/backups/'
+    // const backupDir = '/var/www/html/backups/'
 
     if (!RUN_TEST) {
       const files = fs.readdirSync(backupDir)
