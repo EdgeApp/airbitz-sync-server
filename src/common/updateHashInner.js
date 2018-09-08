@@ -6,7 +6,7 @@
 const { getConfig, isReservedRepoName } = require('./syncUtils.js')
 const config = getConfig()
 const sprintf = require('sprintf-js').sprintf
-const url = sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
+const url = sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
 const nano = require('nano')(url)
 const _dbRepos = nano.db.use('db_repos')
 

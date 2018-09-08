@@ -1,6 +1,7 @@
 {
-  "couchUserName": "username",
-  "couchPassword": "password",
+  "couchAdminPassword": "blank",
+  "couchUserPassword": "password",
+  "couchSeedServer": "https://username:password@git2.airbitz.co:6984",
   "userDir": "/home/bitz/",
   "reposDir": "www/repos",
   "failedRepos": "failedRepos.json",

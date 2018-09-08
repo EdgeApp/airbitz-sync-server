@@ -72,7 +72,7 @@ function getFailedReposFileName (): string {
 }
 
 function getCouchUrl (): string {
-  return sprintf('http://%s:%s@localhost:5984', config.couchUserName, config.couchPassword)
+  return sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
 }
 
 function getRepoListFile (): string {
