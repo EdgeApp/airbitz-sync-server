@@ -48,6 +48,10 @@ Prune Auth server backups. This will loop and prune excessive backups
 
     node lib/pruneBackups.js
 
+Update list of servers in pool. This adds the current server to the pool if not already there and adds other servers to replication.
+
+    node lib/updateServers.js
+
 ### Run all the background scripts using `forever-service`
 
     cd /home/bitz/code/airbitz-sync-server/lib
@@ -55,6 +59,7 @@ Prune Auth server backups. This will loop and prune excessive backups
     sudo forever-service install gcRepos -r bitz --script gcRepos.js  --start
     sudo forever-service install syncRepos -r bitz --script syncRepos.js  --start
     sudo forever-service install pruneBackups -r bitz --script pruneBackups.js  --start
+    sudo forever-service install updateServers -r bitz --script updateServers.js  --start
 
 ### Delete the background daemons
 
@@ -62,6 +67,7 @@ Prune Auth server backups. This will loop and prune excessive backups
     sudo forever-service delete fixStuck
     sudo forever-service delete gcRepos
     sudo forever-service delete pruneBackups
+    sudo forever-service delete updateServers
 
 ### Restart the background process scripts
 
@@ -69,4 +75,5 @@ Prune Auth server backups. This will loop and prune excessive backups
     sudo service fixStuck restart
     sudo service gcRepos restart
     sudo service pruneBackups restart
+    sudo service updateServers restart
     sudo systemctl restart couchdb

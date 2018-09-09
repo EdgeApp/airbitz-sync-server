@@ -79,12 +79,23 @@ function getRepoListFile (): string {
   return config.repoListPath + 'repolist.txt'
 }
 
+function getReposUrl (): string {
+  return config.reposUrl.toLowerCase()
+}
 function getHostname (): string {
   const hostname = easyEx(null, 'hostname')
   const hostArray = hostname.split('.')
   let host = hostArray[0]
   host = host.replace(/(\r\n|\n|\r)/gm, '')
   return host.toLowerCase()
+}
+
+function getCouchUserPassword (): string {
+  return config.couchUserPassword
+}
+
+function getCouchAdminPassword (): string {
+  return config.couchAdminPassword
 }
 
 function getRepoSubdir (repo: string): string {
@@ -161,10 +172,13 @@ module.exports = {
   getReposDir,
   getRepoListFile,
   getHostname,
+  getReposUrl,
   getRepoSubdir,
   parseIntSafe,
   moveRepoToBackup,
   getCouchUrl,
+  getCouchUserPassword,
+  getCouchAdminPassword,
   getFailedReposFileName,
   getRepoPath,
   getConfig,

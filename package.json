@@ -41,8 +41,10 @@
     "forever": "^0.15.3",
     "mkdirp": "^0.5.1",
     "nano": "^6.3.0",
+    "node-fetch": "^2.2.0",
     "rsync": "^0.6.1",
     "sprintf-js": "^1.1.1",
-    "sync-request": "4.0.1"
+    "sync-request": "4.0.1",
+    "url-parse": "^1.4.3"
   }
 }
