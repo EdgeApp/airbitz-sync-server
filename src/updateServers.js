@@ -57,7 +57,7 @@ async function main () {
   while (1) {
     try {
       console.log(`${dateString()}: Starting...`)
-      const views = await getDesign()
+      let views = await getDesign()
       let servers = await getServers()
 
       // Add ourselves to server list if not already there.
@@ -106,6 +106,12 @@ async function main () {
         .replace('__SERVER_ARRAY__', serverArrayString)
       newView.map = mapString
 
+      if (!views) {
+        views = {
+          _id: '_design/repos',
+          language: 'javascript'
+        }
+      }
       if (!views.views) {
         views.views = {}
       }
