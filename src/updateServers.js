@@ -106,7 +106,7 @@ async function main () {
         .replace('__SERVER_ARRAY__', serverArrayString)
       newView.map = mapString
 
-      if (!views) {
+      if (!views || views.error) {
         views = {
           _id: '_design/repos',
           language: 'javascript'
