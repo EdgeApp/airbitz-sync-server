@@ -86,7 +86,7 @@ async function syncRepoAllServers (diff: any, servers: any, failArray: Array<str
   let success = false
   for (let s = 0; s < servers.length; s++) {
     const serverName = servers[s].name
-    if (syncedHash !== hashMap[serverName]) {
+    if (hashMap[serverName] !== undefined && syncedHash !== hashMap[serverName]) {
       if (host !== serverName) {
         // console.log('Pulling repo:' + repo + ' hash:' + hashMap[serverName])
         // await snooze(5000)
