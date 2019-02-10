@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from subprocess import check_call, check_output, CalledProcessError
 from django.conf import settings
 
-import json, os, os.path, random, string
+import shutil, json, os, os.path, random, string
 
 from restapi.utils import create_repo
 
@@ -103,6 +103,7 @@ def git_update(path, storeId, changes, start_hash=None):
     try:
         # run post receive hook
         check_output(["./hooks/post-receive".format(path)], cwd=path)
+        shutil.rmtree(working_tree)
     except Exception as e:
         print 'Working Tree', working_tree
         print e
