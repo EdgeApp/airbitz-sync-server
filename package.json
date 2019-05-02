@@ -1,23 +1,34 @@
 {
   "name": "airbitz-sync-server",
   "version": "1.0.0",
+  "private": true,
   "description": "Airbitz git sync server",
-  "main": "none.js",
-  "scripts": {
-    "build": "flow-remove-types src/ -d lib/ && flow-remove-types testsrc/ -d test/",
-    "flow": "flow",
-    "lint:fix": "standard '*.js' 'src/**/*.js' 'testsrc/**/*.js' --fix",
-    "lint": "standard '*.js' 'src/**/*.js' 'testsrc/**/*.js' && npm run flow",
-    "test": "npm run lint",
-    "precommit": "npm run build && npm test",
-    "prepare": "npm run build"
-  },
   "keywords": [],
+  "license": "ISC",
   "author": "Edge (Airbitz Inc)",
   "contributors": [
     "Paul Puey <paul@edgesecure.co>"
   ],
-  "license": "ISC",
+  "main": "none.js",
+  "scripts": {
+    "build": "flow-remove-types src/ -d lib/ && flow-remove-types testsrc/ -d test/",
+    "flow": "flow",
+    "lint": "standard '*.js' 'src/**/*.js' 'testsrc/**/*.js' && npm run flow",
+    "lint:fix": "standard '*.js' 'src/**/*.js' 'testsrc/**/*.js' --fix",
+    "precommit": "npm run build && npm test",
+    "prepare": "npm run build",
+    "test": "npm run lint"
+  },
+  "dependencies": {
+    "forever": "^0.15.3",
+    "mkdirp": "^0.5.1",
+    "nano": "^6.3.0",
+    "node-fetch": "^2.2.0",
+    "rsync": "^0.6.1",
+    "sprintf-js": "^1.1.1",
+    "sync-request": "4.0.1",
+    "url-parse": "^1.4.3"
+  },
   "devDependencies": {
     "babel-eslint": "^8.2.3",
     "chai": "^3.5.0",
@@ -36,15 +47,5 @@
     "plugins": [
       "flowtype"
     ]
-  },
-  "dependencies": {
-    "forever": "^0.15.3",
-    "mkdirp": "^0.5.1",
-    "nano": "^6.3.0",
-    "node-fetch": "^2.2.0",
-    "rsync": "^0.6.1",
-    "sprintf-js": "^1.1.1",
-    "sync-request": "4.0.1",
-    "url-parse": "^1.4.3"
   }
 }
