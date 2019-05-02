@@ -166,6 +166,7 @@ async function main () {
           create_target: true,
           continuous: true
         }
+        if (repl != null && repl._rev != null) body._rev = repl._rev
         console.log('Pushing new replicator')
         console.log(body)
         await pushDoc(`${url}/_replicator/${repId}`, body)
