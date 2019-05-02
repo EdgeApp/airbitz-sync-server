@@ -139,7 +139,8 @@ async function main () {
         const repId = `rep_${s.name}`
         let repl
         try {
-          repl = getDoc(`${url}/_replicator/${repId}`)
+          repl = await getDoc(`${url}/_replicator/${repId}`)
+          console.log('Existing replicator: ', repl)
         } catch (e) {}
 
         if (
