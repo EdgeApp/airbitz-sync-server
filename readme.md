@@ -1,7 +1,7 @@
 # Sync Server
 
 This is a simple rest API to create new repos. The django apps calls
-`node lib/createRepo.js`. 
+`node lib/createRepo.js`.
 
 # JS Helper scripts
 
@@ -61,14 +61,6 @@ Update list of servers in pool. This adds the current server to the pool if not 
     sudo forever-service install pruneBackups -r bitz --script pruneBackups.js  --start
     sudo forever-service install updateServers -r bitz --script updateServers.js  --start
 
-### Delete the background daemons
-
-    sudo forever-service delete syncRepos
-    sudo forever-service delete fixStuck
-    sudo forever-service delete gcRepos
-    sudo forever-service delete pruneBackups
-    sudo forever-service delete updateServers
-
 ### Restart the background process scripts
 
     sudo service syncRepos restart
@@ -77,3 +69,21 @@ Update list of servers in pool. This adds the current server to the pool if not 
     sudo service pruneBackups restart
     sudo service updateServers restart
     sudo systemctl restart couchdb
+
+### Stop the background scripts
+
+    sudo service syncRepos stop
+    sudo service fixStuck stop
+    sudo service gcRepos stop
+    sudo service pruneBackups stop
+    sudo service updateServers stop
+    sudo systemctl stop couchdb
+    sudo supervisorctl stop syncserver
+
+### Delete the background daemons
+
+    sudo forever-service delete syncRepos
+    sudo forever-service delete fixStuck
+    sudo forever-service delete gcRepos
+    sudo forever-service delete pruneBackups
+    sudo forever-service delete updateServers
