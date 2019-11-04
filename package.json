@@ -12,12 +12,19 @@
   "main": "none.js",
   "scripts": {
     "build": "flow-remove-types src/ -d lib/ && flow-remove-types testsrc/ -d test/",
+    "fix": "npm run lint -- --fix",
     "flow": "flow",
-    "lint": "standard '*.js' 'src/**/*.js' 'testsrc/**/*.js' && npm run flow",
-    "lint:fix": "standard '*.js' 'src/**/*.js' 'testsrc/**/*.js' --fix",
-    "precommit": "npm run build && npm test",
-    "prepare": "npm run build",
-    "test": "npm run lint"
+    "lint": "eslint .",
+    "precommit": "lint-staged && npm run build",
+    "prepare": "npm run build"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "eslint"
   },
   "dependencies": {
     "forever": "^0.15.3",
@@ -30,22 +37,22 @@
     "url-parse": "^1.4.3"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.3",
+    "babel-eslint": ">=10.0.0",
     "chai": "^3.5.0",
-    "chai-as-promised": "^6.0.0",
-    "eslint-plugin-flowtype": "^2.46.3",
-    "eslint-plugin-promise": "^3.7.0",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint": ">=6.2.2",
+    "eslint-config-standard-kit": ">=0.14.2",
+    "eslint-plugin-flowtype": ">=4.3.0",
+    "eslint-plugin-import": ">=2.18.0",
+    "eslint-plugin-node": ">=9.1.0",
+    "eslint-plugin-prettier": ">=3.0.0",
+    "eslint-plugin-promise": ">=4.2.1",
+    "eslint-plugin-simple-import-sort": ">=4.0.0",
+    "eslint-plugin-standard": ">=4.0.0",
     "flow-bin": "^0.75.0",
     "flow-remove-types": "^1.2.3",
-    "husky": "^0.14.3",
+    "husky": ">=3.0.0",
+    "lint-staged": ">=9.0.0",
     "mocha": "^3.1.2",
-    "standard": "^11.0.1"
-  },
-  "standard": {
-    "parser": "babel-eslint",
-    "plugins": [
-      "flowtype"
-    ]
+    "prettier": ">=1.0.0"
   }
 }
