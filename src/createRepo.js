@@ -4,7 +4,7 @@ const { createRepo } = require('./common/createRepoInner.js')
 const { updateHash } = require('./common/updateHashInner.js')
 const { getHostname } = require('./common/syncUtils.js')
 
-async function main () {
+async function main() {
   if (process.argv.length < 3) {
     return -1
   }
@@ -12,7 +12,7 @@ async function main () {
   try {
     const host = getHostname()
 
-    if (await createRepo(process.argv[2]) === -1) {
+    if ((await createRepo(process.argv[2])) === -1) {
       process.exit(-1)
     }
     await updateHash(host, process.argv[2], 'HEAD')

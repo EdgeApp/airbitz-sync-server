@@ -34,22 +34,22 @@ let servers = []
 
 const host = getHostname()
 
-async function getRepos () {
-  return new Promise((resolve) => {
+async function getRepos() {
+  return new Promise(resolve => {
     _dbRepos.view('repos', host, null, (err, doc) => {
       if (err === null) {
         // resolve({'rows': []})
         resolve(doc)
       } else {
-        resolve({'rows': []})
+        resolve({ rows: [] })
       }
     })
   })
 }
 
-async function getServers () {
-  return new Promise((resolve) => {
-    _dbRepos.get('00000000_servers', function (err, response) {
+async function getServers() {
+  return new Promise(resolve => {
+    _dbRepos.get('00000000_servers', function(err, response) {
       if (err) {
         if (err.error === 'not_found') {
           // Create the db entry
@@ -68,7 +68,7 @@ async function getServers () {
   })
 }
 
-function shuffle (a: Array<any>) {
+function shuffle(a: Array<any>) {
   let j, x, i
   for (i = a.length - 1; i > 0; i--) {
     j = Math.floor(Math.random() * (i + 1))
@@ -78,7 +78,11 @@ function shuffle (a: Array<any>) {
   }
 }
 
-async function syncRepoAllServers (diff: any, servers: any, failArray: Array<string>) {
+async function syncRepoAllServers(
+  diff: any,
+  servers: any,
+  failArray: Array<string>
+) {
   shuffle(servers)
   let syncedHash: string = ''
   const repo = diff.id
@@ -86,7 +90,10 @@ async function syncRepoAllServers (diff: any, servers: any, failArray: Array<str
   let success = false
   for (let s = 0; s < servers.length; s++) {
     const serverName = servers[s].name
-    if (hashMap[serverName] !== undefined && syncedHash !== hashMap[serverName]) {
+    if (
+      hashMap[serverName] !== undefined &&
+      syncedHash !== hashMap[serverName]
+    ) {
       if (host !== serverName) {
         // console.log('Pulling repo:' + repo + ' hash:' + hashMap[serverName])
         // await snooze(5000)
@@ -107,17 +114,22 @@ async function syncRepoAllServers (diff: any, servers: any, failArray: Array<str
 
 const QUEUE_SIZE = 32
 
-async function main () {
+async function main() {
   while (1) {
     servers = await getServers()
     const doc = await getRepos()
     const array = doc.rows
-    let failArray = []
+    const failArray = []
 
-    let promiseArray = []
+    const promiseArray = []
     for (let n = 0; n < array.length; n++) {
       const diff = array[n]
-      console.log('Syncing repo %d of %d failed:%d', n, array.length, failArray.length)
+      console.log(
+        'Syncing repo %d of %d failed:%d',
+        n,
+        array.length,
+        failArray.length
+      )
       if (typeof diff.value.servers !== 'undefined') {
         continue
       }
@@ -148,22 +160,33 @@ async function main () {
   }
 }
 
-async function pullRepoFromServer (repoName, server, retry = true) {
+async function pullRepoFromServer(repoName, server, retry = true) {
   const date = new Date()
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
-  const log = sprintf('%s:%s pullRepoFromServer:%s %s', date.toDateString(), date.toTimeString(), server.name, repoName)
+  const log = sprintf(
+    '%s:%s pullRepoFromServer:%s %s',
+    date.toDateString(),
+    date.toTimeString(),
+    server.name,
+    repoName
+  )
   console.log(log)
 
   await createRepo(repoName)
 
-  const status = {'branch': false, 'absync': false, 'find': false, 'push': false, 'writedb': false}
+  const status = {
+    branch: false,
+    absync: false,
+    find: false,
+    push: false,
+    writedb: false
+  }
 
   try {
     await easyExAsync(localPath, 'git branch -D incoming')
     status.branch = true
-  } catch (e) {
-  }
+  } catch (e) {}
 
   let retval = ''
   try {
@@ -184,8 +207,7 @@ async function pullRepoFromServer (repoName, server, retry = true) {
       try {
         const bakdir = getReposDir() + '.bak/' + repoName
         await rename(bakdir, bakdir + '.deleteme')
-      } catch (e) {
-      }
+      } catch (e) {}
     }
 
     if (retval.length > 0) {

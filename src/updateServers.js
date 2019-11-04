@@ -23,25 +23,25 @@ const host = getHostname()
 const reposUrl = getReposUrl()
 const couchAdminPassword = getCouchAdminPassword()
 
-async function getDesign () {
+async function getDesign() {
   return getDoc(`${url}/db_repos/_design/repos`)
 }
-async function getServers () {
+async function getServers() {
   return getDoc(`${url}/db_repos/00000000_servers`)
 }
-async function getDoc (docUrl) {
+async function getDoc(docUrl) {
   const result = await fetch(docUrl)
   const out = await result.json()
   return out
 }
 
-async function pushServers (body) {
+async function pushServers(body) {
   return pushDoc(`${url}/db_repos/00000000_servers`, body)
 }
-async function pushDesign (body) {
+async function pushDesign(body) {
   return pushDoc(`${url}/db_repos/_design/repos`, body)
 }
-async function pushDoc (docUrl, body) {
+async function pushDoc(docUrl, body) {
   const result = await fetch(docUrl, {
     method: 'PUT',
     body: JSON.stringify(body),
@@ -53,7 +53,7 @@ async function pushDoc (docUrl, body) {
 
 main()
 
-async function main () {
+async function main() {
   while (1) {
     try {
       console.log(`${dateString()}: Starting...`)

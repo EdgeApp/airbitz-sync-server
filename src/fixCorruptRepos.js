@@ -19,20 +19,20 @@ console.log(dateString() + ' updateReposHashes.js starting')
 const TEST_ONLY = false // Set to true to not execute any disk write functions
 
 if (TEST_ONLY) {
-  moveRepoToBackup = function (repo: string) {
+  moveRepoToBackup = function(repo: string) {
     console.log(sprintf('TEST moveRepoToBackup repo:%s', repo))
   }
-  deleteRepoRecord = function (repo: string) {
+  deleteRepoRecord = function(repo: string) {
     console.log(sprintf('TEST deleteRepoRecord repo:%s', repo))
   }
-  fs.unlink = function (file: string) {
+  fs.unlink = function(file: string) {
     console.log(sprintf('TEST fs.unlink file:%s', file))
   }
 }
 
 mainLoop()
 
-async function mainLoop () {
+async function mainLoop() {
   // const localRepos =
   await getLocalDirs()
   // console.log('localRepos:' + localRepos.length)
@@ -72,11 +72,11 @@ async function mainLoop () {
 //   return remoteRepoList
 // }
 
-async function getLocalDirs () {
+async function getLocalDirs() {
   console.log('ENTER getLocalDirs')
 
   // If repolist.txt exists, use it. Otherwise, build up the list ourselves
-  let allDirs = []
+  const allDirs = []
   let numCorrupt = 0
 
   // const repolistFile = getRepoListFile()
@@ -95,18 +95,18 @@ async function getLocalDirs () {
 
     for (let f = 0; f < dir.length; f++) {
       // For testing only look for 'wa...' directories which are testing only
-      if (RUN_SUBSET && !dir[ f ].startsWith('ff')) {
+      if (RUN_SUBSET && !dir[f].startsWith('ff')) {
         continue
       }
 
       try {
-        const path = reposDir + '/' + dir[ f ]
+        const path = reposDir + '/' + dir[f]
         const stat = fs.statSync(path)
         if (stat.isDirectory()) {
           const dir2 = fs.readdirSync(path)
           for (let f2 = 0; f2 < dir2.length; f2++) {
             // For testing only look for 'wa...' directories which are testing only
-            if (RUN_SUBSET && !dir2[ f2 ].startsWith('ffff')) {
+            if (RUN_SUBSET && !dir2[f2].startsWith('ffff')) {
               continue
             }
             // Check if directory is not base16 or 40 characters. If not AND the directory is empty or
@@ -118,7 +118,7 @@ async function getLocalDirs () {
               invalidRepoName = true
             }
 
-            const path2 = path + '/' + dir2[ f2 ]
+            const path2 = path + '/' + dir2[f2]
             if (invalidRepoName) {
               const stat2 = fs.statSync(path2)
               if (stat2.isDirectory()) {
@@ -150,7 +150,9 @@ async function getLocalDirs () {
 
             if (emptyRepo && invalidRepoName) {
               numCorrupt++
-              console.log(sprintf('  %d Archiving invalid repo: %s', numCorrupt, path2))
+              console.log(
+                sprintf('  %d Archiving invalid repo: %s', numCorrupt, path2)
+              )
               try {
                 moveRepoToBackup(repo)
               } catch (e) {}
@@ -158,7 +160,7 @@ async function getLocalDirs () {
               // Remove from DB
               await deleteRepoRecord(repo)
             } else {
-              allDirs.push(dir2[ f2 ])
+              allDirs.push(dir2[f2])
             }
           }
         }

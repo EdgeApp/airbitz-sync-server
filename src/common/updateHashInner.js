@@ -10,10 +10,10 @@ const url = sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
 const nano = require('nano')(url)
 const _dbRepos = nano.db.use('db_repos')
 
-async function updateHash (server: string, repo:string, hash: string | null) {
+async function updateHash(server: string, repo: string, hash: string | null) {
   // console.log('ENTER writeDb:' + repo + ' hash:' + hash)
   return new Promise((resolve, reject) => {
-    _dbRepos.get(repo, function (err, response) {
+    _dbRepos.get(repo, function(err, response) {
       if (err) {
         if (err.error === 'not_found') {
           // Create the db entry
@@ -39,7 +39,7 @@ async function updateHash (server: string, repo:string, hash: string | null) {
   })
 }
 
-async function insertDb (server, repo, hash: string | null, repoObj: any = {}) {
+async function insertDb(server, repo, hash: string | null, repoObj: any = {}) {
   // console.log('ENTER insertDB:' + repo + ' hash:' + hash)
   if (hash === null) {
     if (repoObj[server] == null) {
@@ -54,8 +54,8 @@ async function insertDb (server, repo, hash: string | null, repoObj: any = {}) {
     repoObj[server + ':time'] = d.getTime()
   }
 
-  return new Promise((resolve) => {
-    _dbRepos.insert(repoObj, repo, function (err, res) {
+  return new Promise(resolve => {
+    _dbRepos.insert(repoObj, repo, function(err, res) {
       if (err) {
         resolve(updateHash(server, repo, hash))
       } else {
@@ -66,13 +66,13 @@ async function insertDb (server, repo, hash: string | null, repoObj: any = {}) {
   })
 }
 
-async function deleteRepoRecord (repo:string) {
+async function deleteRepoRecord(repo: string) {
   console.log('deleteRepoRecord: ' + repo)
   return new Promise((resolve, reject) => {
     if (isReservedRepoName(repo)) {
       resolve(true)
     }
-    _dbRepos.get(repo, function (err, response) {
+    _dbRepos.get(repo, function(err, response) {
       if (err) {
         if (err.error === 'not_found') {
           resolve(true)
