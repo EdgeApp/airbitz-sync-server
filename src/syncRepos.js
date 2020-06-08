@@ -87,6 +87,13 @@ async function syncRepoAllServers(
   let syncedHash: string = ''
   const repo = diff.id
   const hashMap = diff.value
+
+  if (hashMap['ip-172-31-10-198'] != null && hashMap.git3 == null) {
+    hashMap.git3 = hashMap['ip-172-31-10-198']
+    hashMap['git3:time'] = hashMap['ip-172-31-10-198:time']
+    console.log('fixed doc', hashMap)
+  }
+
   let success = false
   for (let s = 0; s < servers.length; s++) {
     const serverName = servers[s].name
