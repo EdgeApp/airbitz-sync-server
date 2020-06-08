@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "standard-kit/prettier",
+    "standard-kit/prettier/node",
+    "standard-kit/prettier/flow"
+  ],
+  "plugins": [
+    "simple-import-sort"
+  ],
+  "rules": {
+    "simple-import-sort/sort": "error"
+  }
+}

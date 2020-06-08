@@ -13,7 +13,7 @@ const fsstat = util.promisify(fs.stat)
 // $FlowFixMe
 const mkdirpp = util.promisify(mkdirp)
 
-async function createRepo (repo: string) {
+async function createRepo(repo: string) {
   const fullPath = getRepoPath(repo)
   let stat = null
 
@@ -43,7 +43,10 @@ async function createRepo (repo: string) {
   }
 
   try {
-    await easyExAsync(fullPath, 'git config --file config http.receivepack true')
+    await easyExAsync(
+      fullPath,
+      'git config --file config http.receivepack true'
+    )
     await easyExAsync(fullPath, 'git config receive.denyDeletes true')
     await easyExAsync(fullPath, 'git config receive.denyNonFastForwards true')
     await easyExAsync(fullPath, 'rm -rf hooks')

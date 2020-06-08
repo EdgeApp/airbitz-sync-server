@@ -12,7 +12,7 @@ const NUM_MONTHS_DAILY_BACKUP = 1
 const NUM_MONTHS_WEEKLY_BACKUP = 4
 const NUM_MONTHS_MONTHLY_BACKUP = 60
 
-let testFiles = []
+const testFiles = []
 
 for (let y = 2016; y <= 2017; y++) {
   for (let m = 1; m <= 12; m++) {
@@ -21,7 +21,7 @@ for (let y = 2016; y <= 2017; y++) {
         if (y >= 2017 && m >= 9) {
           continue
         }
-        let file = sprintf('%04d-%02d-%02d_%02d-%02d.dump.gpg', y, m, d, h, 0)
+        const file = sprintf('%04d-%02d-%02d_%02d-%02d.dump.gpg', y, m, d, h, 0)
         testFiles.push(file)
       }
     }

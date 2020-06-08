@@ -10,12 +10,12 @@ const fs = require('fs')
 
 const rootDir = config.userDir + config.reposDir
 
-function isHex (h: string) {
+function isHex(h: string) {
   const out = /^[0-9A-F]+$/i.test(h)
   return out
 }
 
-function parseIntSafe (result?: Array<string> | null, idx: number): number {
+function parseIntSafe(result?: Array<string> | null, idx: number): number {
   if (result && result[idx]) {
     return parseInt(result[idx])
   } else {
@@ -23,21 +23,22 @@ function parseIntSafe (result?: Array<string> | null, idx: number): number {
   }
 }
 
-function isReservedRepoName (repoName: string) {
-  return (repoName === '00000000_servers')
+function isReservedRepoName(repoName: string) {
+  return repoName === '00000000_servers'
 }
 
-function getConfig () {
+function getConfig() {
   return config
 }
 
-function moveRepoToBackup (repoName: string) {
+function moveRepoToBackup(repoName: string) {
   const localPath = getRepoPath(repoName)
   let index = 0
   let newdir
   while (1) {
     try {
-      newdir = getReposDir() + '.bak/' + repoName + '.' + ('0000' + index).slice(-3)
+      newdir =
+        getReposDir() + '.bak/' + repoName + '.' + ('0000' + index).slice(-3)
       fs.renameSync(localPath, newdir)
       console.log('rename successful: ' + localPath + ' -> ' + newdir)
       try {
@@ -58,31 +59,31 @@ function moveRepoToBackup (repoName: string) {
   }
 }
 
-function getAuthBackupsDir () {
+function getAuthBackupsDir() {
   return config.authBackupsDir
 }
 
-function getRepoPath (repo: string): string {
+function getRepoPath(repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2) + '/' + repo
   return fullPath
 }
 
-function getFailedReposFileName (): string {
+function getFailedReposFileName(): string {
   return config.userDir + config.failedRepos
 }
 
-function getCouchUrl (): string {
+function getCouchUrl(): string {
   return sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
 }
 
-function getRepoListFile (): string {
+function getRepoListFile(): string {
   return config.repoListPath + 'repolist.txt'
 }
 
-function getReposUrl (): string {
+function getReposUrl(): string {
   return config.reposUrl.toLowerCase()
 }
-function getHostname (): string {
+function getHostname(): string {
   const hostname = easyEx(null, 'hostname')
   const hostArray = hostname.split('.')
   let host = hostArray[0]
@@ -90,29 +91,29 @@ function getHostname (): string {
   return host.toLowerCase()
 }
 
-function getCouchUserPassword (): string {
+function getCouchUserPassword(): string {
   return config.couchUserPassword
 }
 
-function getCouchAdminPassword (): string {
+function getCouchAdminPassword(): string {
   return config.couchAdminPassword
 }
 
-function getRepoSubdir (repo: string): string {
+function getRepoSubdir(repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2)
   return fullPath
 }
 
-function getReposDir (): string {
+function getReposDir(): string {
   return rootDir
 }
 
-function dateString () {
+function dateString() {
   const date = new Date()
   return date.toDateString() + ':' + date.toTimeString()
 }
 
-function snooze (ms: number) {
+function snooze(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -124,14 +125,19 @@ function snooze (ms: number) {
 //   env: any
 // }
 
-function easyEx (path: string | null, cmdstring: string): string {
+function easyEx(path: string | null, cmdstring: string): string {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
 
   let opts
   if (path) {
-    opts = { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' }
+    opts = {
+      encoding: 'utf8',
+      timeout: 20000,
+      cwd: path,
+      killSignal: 'SIGKILL'
+    }
   } else {
     opts = { encoding: 'utf8', timeout: 20000, killSignal: 'SIGKILL' }
   }
@@ -140,19 +146,24 @@ function easyEx (path: string | null, cmdstring: string): string {
   return r
 }
 
-function easyExAsync (path: string | null, cmdstring: string) {
+function easyExAsync(path: string | null, cmdstring: string) {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
 
   let opts
   if (path) {
-    opts = { encoding: 'utf8', timeout: 20000, cwd: path, killSignal: 'SIGKILL' }
+    opts = {
+      encoding: 'utf8',
+      timeout: 20000,
+      cwd: path,
+      killSignal: 'SIGKILL'
+    }
   } else {
     opts = { encoding: 'utf8', timeout: 20000, killSignal: 'SIGKILL' }
   }
   return new Promise((resolve, reject) => {
-    childProcess.execFile(cmd, args, opts, function (err, stdout, stderr) {
+    childProcess.execFile(cmd, args, opts, function(err, stdout, stderr) {
       if (err) {
         reject(err)
       } else {

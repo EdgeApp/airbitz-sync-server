@@ -6,15 +6,13 @@ const { snooze } = require('./common/syncUtils.js')
 let procs = []
 let newProcs = []
 
-async function main () {
+async function main() {
   while (1) {
     let ps: string = ''
     try {
       // $FlowFixMe
-      ps = cs.execFileSync('ps', [ 'xau' ], { encoding: 'utf8' })
-    } catch (e) {
-
-    }
+      ps = cs.execFileSync('ps', ['xau'], { encoding: 'utf8' })
+    } catch (e) {}
 
     const psArray = ps.split('\n')
 
@@ -26,13 +24,13 @@ async function main () {
       if (procLine.includes('ab-sync')) {
         procType = 'ab-sync'
       }
-      if ((procType != null) && procLine.includes('.airbitz.co')) {
+      if (procType != null && procLine.includes('.airbitz.co')) {
         // const regEx = /bitz\s(\d*) (.*)sync\.airbitz\.co\/repos\/(.*) master/g
         const regEx = /bitz\s*(\d*) (.*)\.airbitz\.co\/repos\/(.*) /g
         const arr = regEx.exec(procLine)
 
         if (arr != null && arr.length > 0) {
-          const procObj = {pid: arr[1], repoName: arr[3], procType}
+          const procObj = { pid: arr[1], repoName: arr[3], procType }
           if (!findProc(procObj)) {
             newProcs.push(procObj)
             console.log('Adding proc')
@@ -40,10 +38,8 @@ async function main () {
           } else {
             // Kill the process
             try {
-              cs.execFileSync('kill', ['-9', procObj.pid], {encoding: 'utf8'})
-            } catch (e) {
-
-            }
+              cs.execFileSync('kill', ['-9', procObj.pid], { encoding: 'utf8' })
+            } catch (e) {}
             console.log('Killing proc')
             console.log(procObj)
             // removeProc(procObj)
@@ -63,7 +59,7 @@ async function main () {
   }
 }
 
-function findProc (procObj) {
+function findProc(procObj) {
   for (const proc of procs) {
     if (
       proc.pid !== undefined &&

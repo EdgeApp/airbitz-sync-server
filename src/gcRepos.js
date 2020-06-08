@@ -1,7 +1,12 @@
 // @flow
 
 const fs = require('fs')
-const { dateString, getReposDir, snooze, getRepoListFile } = require('./common/syncUtils.js')
+const {
+  dateString,
+  getReposDir,
+  snooze,
+  getRepoListFile
+} = require('./common/syncUtils.js')
 
 const LOOP_DELAY_MILLISECONDS = 5000
 
@@ -13,7 +18,7 @@ let repos: Array<string> = []
 
 mainLoop()
 
-async function mainLoop () {
+async function mainLoop() {
   while (1) {
     if (repos.length === 0) {
       repos = getLocalDirs()
@@ -36,7 +41,7 @@ async function mainLoop () {
   }
 }
 
-function getLocalDirs () {
+function getLocalDirs() {
   console.log('ENTER getLocalDirs')
 
   // If repolist.txt exists, use it. Otherwise, build up the list ourselves
@@ -47,12 +52,12 @@ function getLocalDirs () {
 
   if (exists) {
     console.log('  Found local repolist.txt file')
-    let arrayRepos = repoListToArray(repolistFile)
+    const arrayRepos = repoListToArray(repolistFile)
     allDirs = allDirs.concat(arrayRepos)
   } else {
     console.log('  Finding all local repos')
     const dir = fs.readdirSync(reposDir)
-    let runSubset = false
+    const runSubset = false
 
     for (let f = 0; f < dir.length; f++) {
       // For testing only look for 'wa...' directories which are testing only
@@ -83,9 +88,12 @@ function getLocalDirs () {
   return allDirs
 }
 
-function repoListToArray (repolistfile) {
-  const remoteRepoListRaw = fs.readFileSync(repolistfile).toString().split('\n')
-  let remoteRepoList = []
+function repoListToArray(repolistfile) {
+  const remoteRepoListRaw = fs
+    .readFileSync(repolistfile)
+    .toString()
+    .split('\n')
+  const remoteRepoList = []
 
   for (let m = 0; m < remoteRepoListRaw.length; m++) {
     const repo = remoteRepoListRaw[m]
@@ -100,7 +108,7 @@ function repoListToArray (repolistfile) {
   return remoteRepoList
 }
 
-function getRandomInt (min, max) {
+function getRandomInt(min, max) {
   min = Math.ceil(min)
   max = Math.floor(max)
   return Math.floor(Math.random() * (max - min)) + min

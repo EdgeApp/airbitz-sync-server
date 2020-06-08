@@ -6,7 +6,7 @@
 const { sprintf } = require('sprintf-js')
 const { parseIntSafe } = require('./syncUtils.js')
 
-function monthDiff (d1: Date, d2: Date) {
+function monthDiff(d1: Date, d2: Date) {
   let months
   months = (d2.getFullYear() - d1.getFullYear()) * 12
   months -= d1.getMonth() + 1
@@ -14,17 +14,17 @@ function monthDiff (d1: Date, d2: Date) {
   return months <= 0 ? 0 : months
 }
 
-function hourDiff (d1, d2) {
+function hourDiff(d1, d2) {
   const diff = Math.abs(d2 - d1) / (60 * 60 * 1000)
   return diff
 }
 
-function dayDiff (d1, d2) {
+function dayDiff(d1, d2) {
   const diff = Math.abs(hourDiff(d1, d2) / 24)
   return diff
 }
 
-function getWeekNumber (inDate) {
+function getWeekNumber(inDate) {
   // Copy date so don't modify original
   const d = new Date(+inDate)
   d.setHours(0, 0, 0, 0)
@@ -36,13 +36,15 @@ function getWeekNumber (inDate) {
   // Get first day of year
   const yearStart = new Date(d.getFullYear(), 0, 1)
   // Calculate full weeks to nearest Thursday
-  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+  const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
   // Return array of year and week number
   return weekNo
 }
 
-function arrayDiff (b: any, a: any) {
-  return b.filter((i: any) => { return a.indexOf(i) < 0 })
+function arrayDiff(b: any, a: any) {
+  return b.filter((i: any) => {
+    return a.indexOf(i) < 0
+  })
 }
 
 export type PruneFilesParams = {
@@ -54,7 +56,7 @@ export type PruneFilesParams = {
   numMonthsMonthly: number
 }
 
-function pruneFiles (pruneFilesParams: PruneFilesParams) {
+function pruneFiles(pruneFilesParams: PruneFilesParams) {
   const {
     currentDate,
     files,
@@ -68,8 +70,8 @@ function pruneFiles (pruneFilesParams: PruneFilesParams) {
     date = new Date()
   }
 
-  let keepFiles = []
-  let filesArray = files.slice()
+  const keepFiles = []
+  const filesArray = files.slice()
 
   filesArray.sort()
 
@@ -78,7 +80,7 @@ function pruneFiles (pruneFilesParams: PruneFilesParams) {
   let haveDaily
   let haveHourly
 
-  for (let file of filesArray) {
+  for (const file of filesArray) {
     try {
       let filePushed = false
       const regex = /(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2}).dump.gpg/
@@ -88,13 +90,30 @@ function pruneFiles (pruneFilesParams: PruneFilesParams) {
       const fileDate = parseIntSafe(parseResult, 3)
       const fileHour = parseIntSafe(parseResult, 4)
       const fileMin = parseIntSafe(parseResult, 5)
-      const fileFullDate = new Date(fileYear, fileMonth - 1, fileDate, fileHour, fileMin)
+      const fileFullDate = new Date(
+        fileYear,
+        fileMonth - 1,
+        fileDate,
+        fileHour,
+        fileMin
+      )
       const fileWeek = getWeekNumber(fileFullDate)
       // console.log(sprintf('year:%04d month:%02d day:%02d %02d:%02d', fileYear, fileMonth, fileDate, fileHour, fileMin))
 
       const yearMonth = sprintf('%04d-%02d', fileYear, fileMonth)
-      const yearMonthDate = sprintf('%04d-%02d-%02d', fileYear, fileMonth, fileDate)
-      const yearMonthDateHour = sprintf('%04d-%02d-%02d_%02d', fileYear, fileMonth, fileDate, fileHour)
+      const yearMonthDate = sprintf(
+        '%04d-%02d-%02d',
+        fileYear,
+        fileMonth,
+        fileDate
+      )
+      const yearMonthDateHour = sprintf(
+        '%04d-%02d-%02d_%02d',
+        fileYear,
+        fileMonth,
+        fileDate,
+        fileHour
+      )
       const yearWeek = sprintf('%04d-%02d-week', fileYear, fileWeek)
 
       // if (monthDiff(fileFullDate, date) < NUM_MONTHS_MONTHLY_BACKUP) {
@@ -142,7 +161,7 @@ function pruneFiles (pruneFilesParams: PruneFilesParams) {
       console.log(e)
     }
   }
-  const dFiles = (arrayDiff(files, keepFiles))
+  const dFiles = arrayDiff(files, keepFiles)
   return dFiles
 }
 

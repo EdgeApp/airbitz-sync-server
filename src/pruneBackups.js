@@ -8,7 +8,11 @@ import type { PruneFilesParams } from './common/pruneBackupsInner.js'
 const fs = require('fs')
 const { sprintf } = require('sprintf-js')
 const { pruneFiles } = require('./common/pruneBackupsInner.js')
-const { getAuthBackupsDir, snooze, dateString } = require('./common/syncUtils.js')
+const {
+  getAuthBackupsDir,
+  snooze,
+  dateString
+} = require('./common/syncUtils.js')
 
 const NUM_DAYS_HOURLY_BACKUP = 1
 const NUM_MONTHS_DAILY_BACKUP = 1
@@ -18,14 +22,14 @@ const NUM_MONTHS_MONTHLY_BACKUP = 60
 const RUN_TEST = false
 
 // const RUN_FREQUENCY = (1000 * 10) // Run every 10 seconds
-const RUN_FREQUENCY = (1000 * 60 * 60 * 4) // Run every 4 hours
+const RUN_FREQUENCY = 1000 * 60 * 60 * 4 // Run every 4 hours
 const backupDir = getAuthBackupsDir()
 
-async function main () {
+async function main() {
   while (1) {
     console.log(dateString())
 
-    let backupFiles = []
+    const backupFiles = []
     // const backupDir = '/var/www/html/backups/'
 
     if (!RUN_TEST) {
@@ -42,7 +46,14 @@ async function main () {
               if (y >= 2017 && m >= 9) {
                 continue
               }
-              let file = sprintf('%04d-%02d-%02d_%02d-%02d.dump.gpg', y, m, d, h, 0)
+              const file = sprintf(
+                '%04d-%02d-%02d_%02d-%02d.dump.gpg',
+                y,
+                m,
+                d,
+                h,
+                0
+              )
               backupFiles.push(file)
             }
           }

@@ -4,7 +4,7 @@
  */
 const { updateHash } = require('./common/updateHashInner.js')
 
-async function main () {
+async function main() {
   if (process.argv.length < 5) {
     console.log('Usage: updateHash.js [server] [repo] [hash]')
     return -1
