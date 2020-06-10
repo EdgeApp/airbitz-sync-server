@@ -34,6 +34,12 @@ let servers = []
 
 const host = getHostname()
 
+type ServerInfo = {
+  name: string,
+  url: string,
+  password: string
+}
+
 async function getRepos() {
   return new Promise(resolve => {
     _dbRepos.view('repos', host, null, (err, doc) => {
@@ -47,7 +53,7 @@ async function getRepos() {
   })
 }
 
-async function getServers() {
+async function getServers(): Promise<ServerInfo[]> {
   return new Promise(resolve => {
     _dbRepos.get('00000000_servers', function(err, response) {
       if (err) {
@@ -80,7 +86,7 @@ function shuffle(a: Array<any>) {
 
 async function syncRepoAllServers(
   diff: any,
-  servers: any,
+  servers: ServerInfo[],
   failArray: Array<string>
 ) {
   shuffle(servers)
@@ -167,7 +173,11 @@ async function main() {
   }
 }
 
-async function pullRepoFromServer(repoName, server, retry = true) {
+async function pullRepoFromServer(
+  repoName: string,
+  server: ServerInfo,
+  retry = true
+) {
   const date = new Date()
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
