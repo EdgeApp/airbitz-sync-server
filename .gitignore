@@ -16,5 +16,4 @@ node_modules/
 *-ck.js
 
 lib/
-test/
 syncConfig.json
