@@ -5,7 +5,6 @@
 
 import fsCallback from 'fs'
 import nano from 'nano'
-import { sprintf } from 'sprintf-js'
 import util from 'util'
 
 import { createRepo } from './common/createRepoInner.js'
@@ -138,10 +137,7 @@ async function main() {
     for (let n = 0; n < array.length; n++) {
       const diff = array[n]
       console.log(
-        'Syncing repo %d of %d failed:%d',
-        n,
-        array.length,
-        failArray.length
+        `Syncing repo ${n} of ${array.length} failed:${failArray.length}`
       )
       if (typeof diff.value.servers !== 'undefined') {
         continue
@@ -159,10 +155,9 @@ async function main() {
     await Promise.all(promiseArray)
 
     if (failArray.length) {
-      console.log(sprintf('%s COMPLETE Failed repos:', dateString()))
-      console.log(failArray)
+      console.log(`${dateString()} COMPLETE Failed repos:`, failArray)
     } else {
-      console.log(sprintf('%s COMPLETE No Failed Repos:', dateString()))
+      console.log(`${dateString()} COMPLETE No Failed Repos`)
     }
     try {
       await writeFile(getFailedReposFileName(), JSON.stringify(failArray))
@@ -181,14 +176,11 @@ async function pullRepoFromServer(
   const date = new Date()
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
-  const log = sprintf(
-    '%s:%s pullRepoFromServer:%s %s',
-    date.toDateString(),
-    date.toTimeString(),
-    server.name,
-    repoName
+  console.log(
+    `${date.toDateString()}:${date.toTimeString()} pullRepoFromServer:${
+      server.name
+    } ${repoName}`
   )
-  console.log(log)
 
   await createRepo(repoName)
 
@@ -207,7 +199,7 @@ async function pullRepoFromServer(
 
   let retval = ''
   try {
-    let cmd = sprintf('ab-sync %s %s', localPath, serverPath)
+    let cmd = `ab-sync ${localPath} ${serverPath}`
     await easyExAsync(localPath, cmd)
     status.absync = true
 
@@ -228,7 +220,7 @@ async function pullRepoFromServer(
     }
 
     if (retval.length > 0) {
-      cmd = sprintf('git push %s master', serverPath)
+      cmd = `git push ${serverPath} master`
       await easyExAsync(localPath, cmd)
       status.push = true
     }
@@ -236,7 +228,7 @@ async function pullRepoFromServer(
     retval = await easyExAsync(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
-    console.log(sprintf('  FAILED: %s', repoName))
+    console.log(`  FAILED: ${repoName}`)
     console.log(status)
     return false
   }
@@ -244,11 +236,11 @@ async function pullRepoFromServer(
   retval = await updateHash(host, repoName, retval)
   if (!retval) {
     status.writedb = retval
-    console.log(sprintf('  FAILED:  %s', repoName))
+    console.log(`  FAILED:  ${repoName}`)
     console.log(retval)
     return false
   } else {
-    console.log(sprintf('  SUCCESS: %s', repoName))
+    console.log(`  SUCCESS: ${repoName}`)
     return true
   }
 }

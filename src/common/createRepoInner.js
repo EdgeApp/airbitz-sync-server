@@ -51,7 +51,7 @@ export async function createRepo(repo: string) {
     await easyExAsync(fullPath, 'rm -rf hooks')
     await easyExAsync(fullPath, 'rm -f description')
     await easyExAsync(fullPath, 'ln -s /etc/absync/hooks')
-    // const cmd = sprintf('chown -R %s:%s .', config.user, config.group)
+    // const cmd = `chown -R ${config.user}:${config.group} .`
     // easyEx(fullPath, cmd)
   } catch (e) {
     console.log(e)

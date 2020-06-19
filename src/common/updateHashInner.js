@@ -4,12 +4,11 @@
  */
 
 import nano from 'nano'
-import { sprintf } from 'sprintf-js'
 
 import { getConfig, isReservedRepoName } from './syncUtils.js'
 
 const config = getConfig()
-const url = sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
+const url = `http://admin:${config.couchAdminPassword}@localhost:5984`
 const _dbRepos = nano(url).db.use('db_repos')
 
 export async function updateHash(

@@ -5,7 +5,6 @@
 
 import childProcess from 'child_process'
 import fs from 'fs'
-import { sprintf } from 'sprintf-js'
 
 import config from '../../syncConfig.json'
 
@@ -76,7 +75,7 @@ export function getFailedReposFileName(): string {
 }
 
 export function getCouchUrl(): string {
-  return sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
+  return `http://admin:${config.couchAdminPassword}@localhost:5984`
 }
 
 export function getRepoListFile(): string {
