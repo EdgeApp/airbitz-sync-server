@@ -3,8 +3,9 @@
  * @flow
  */
 
-const { sprintf } = require('sprintf-js')
-const { parseIntSafe } = require('./syncUtils.js')
+import { sprintf } from 'sprintf-js'
+
+import { parseIntSafe } from './syncUtils.js'
 
 function monthDiff(d1: Date, d2: Date) {
   let months
@@ -41,8 +42,8 @@ function getWeekNumber(inDate) {
   return weekNo
 }
 
-function arrayDiff(b: any, a: any) {
-  return b.filter((i: any) => {
+function arrayDiff<T>(b: T[], a: T[]): T[] {
+  return b.filter((i: T) => {
     return a.indexOf(i) < 0
   })
 }
@@ -56,7 +57,7 @@ export type PruneFilesParams = {
   numMonthsMonthly: number
 }
 
-function pruneFiles(pruneFilesParams: PruneFilesParams) {
+export function pruneFiles(pruneFilesParams: PruneFilesParams): string[] {
   const {
     currentDate,
     files,
@@ -70,7 +71,7 @@ function pruneFiles(pruneFilesParams: PruneFilesParams) {
     date = new Date()
   }
 
-  const keepFiles = []
+  const keepFiles: string[] = []
   const filesArray = files.slice()
 
   filesArray.sort()
@@ -164,5 +165,3 @@ function pruneFiles(pruneFilesParams: PruneFilesParams) {
   const dFiles = arrayDiff(files, keepFiles)
   return dFiles
 }
-
-module.exports = { pruneFiles }

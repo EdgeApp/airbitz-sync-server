@@ -1,13 +1,14 @@
 // @flow
 
-const fs = require('fs')
-const childProcess = require('child_process')
-const {
+import childProcess from 'child_process'
+import fs from 'fs'
+
+import {
   dateString,
+  getConfig,
   getReposDir,
-  snooze,
-  getConfig
-} = require('./common/syncUtils.js')
+  snooze
+} from './common/syncUtils.js'
 
 console.log(dateString() + ' repolist.js starting')
 

@@ -1,7 +1,8 @@
 // @flow
 
-const cs = require('child_process')
-const { snooze } = require('./common/syncUtils.js')
+import cs from 'child_process'
+
+import { snooze } from './common/syncUtils.js'
 
 let procs = []
 let newProcs = []

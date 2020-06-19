@@ -3,25 +3,25 @@
  * @flow
  */
 
-const util = require('util')
-const fsCallback = require('fs')
-const { sprintf } = require('sprintf-js')
-const nano = require('nano')
-const { createRepo } = require('./common/createRepoInner.js')
-const { updateHash } = require('./common/updateHashInner.js')
-const {
+import fsCallback from 'fs'
+import nano from 'nano'
+import { sprintf } from 'sprintf-js'
+import util from 'util'
+
+import { createRepo } from './common/createRepoInner.js'
+import {
+  dateString,
+  easyExAsync,
+  getCouchUrl,
+  getFailedReposFileName,
+  getHostname,
   getRepoPath,
   getReposDir,
-  getFailedReposFileName,
-  getCouchUrl,
-  easyExAsync,
-  snooze,
-  getHostname,
-  dateString
-} = require('./common/syncUtils.js')
-// $FlowFixMe
+  snooze
+} from './common/syncUtils.js'
+import { updateHash } from './common/updateHashInner.js'
+
 const writeFile = util.promisify(fsCallback.writeFile)
-// $FlowFixMe
 const rename = util.promisify(fsCallback.rename)
 
 const url = getCouchUrl()
@@ -234,7 +234,6 @@ async function pullRepoFromServer(
     }
 
     retval = await easyExAsync(localPath, 'git rev-parse HEAD')
-    // $FlowFixMe
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
     console.log(sprintf('  FAILED: %s', repoName))

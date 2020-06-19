@@ -1,8 +1,8 @@
 // @flow
 
-const { createRepo } = require('./common/createRepoInner.js')
-const { updateHash } = require('./common/updateHashInner.js')
-const { getHostname } = require('./common/syncUtils.js')
+import { createRepo } from './common/createRepoInner.js'
+import { getHostname } from './common/syncUtils.js'
+import { updateHash } from './common/updateHashInner.js'
 
 async function main() {
   if (process.argv.length < 3) {

@@ -2,19 +2,20 @@
  * Created by paul on 6/19/17.
  */
 
-const fetch = require('node-fetch')
-const parse = require('url-parse')
+import fetch from 'node-fetch'
+import parse from 'url-parse'
 
-const sampleView = require('../couchView.json')
-const {
-  getCouchUrl,
-  getHostname,
-  snooze,
-  getCouchAdminPassword,
+import sampleView from '../couchView.json'
+import {
   dateString,
   getConfig,
-  getReposUrl
-} = require('../lib/common/syncUtils.js')
+  getCouchAdminPassword,
+  getCouchUrl,
+  getHostname,
+  getReposUrl,
+  snooze
+} from '../lib/common/syncUtils.js'
+
 const url = getCouchUrl()
 const config = getConfig()
 

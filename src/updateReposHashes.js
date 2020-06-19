@@ -1,21 +1,21 @@
 // @flow
 
-const fs = require('fs')
-const { sprintf } = require('sprintf-js')
-const childProcess = require('child_process')
+import childProcess from 'child_process'
+import fs from 'fs'
+import { sprintf } from 'sprintf-js'
 
-let { updateHash } = require('./common/updateHashInner.js')
-let {
-  getRepoPath,
+import {
   dateString,
-  getReposDir,
-  getRepoListFile,
-  getHostname,
-  isHex,
   easyEx,
-  parseIntSafe,
-  moveRepoToBackup
-} = require('./common/syncUtils.js')
+  getHostname,
+  getRepoListFile,
+  getRepoPath,
+  getReposDir,
+  isHex,
+  moveRepoToBackup,
+  parseIntSafe
+} from './common/syncUtils.js'
+import { updateHash } from './common/updateHashInner.js'
 
 console.log(dateString() + ' updateReposHashes.js starting')
 
@@ -25,33 +25,6 @@ const TEST_ONLY = false // Set to true to not execute any disk write functions
 const MOVE_INVALID_REPOS = true
 const RUN_SUBSET = false
 const SUBSET_PREFIX = 'ffff'
-
-if (TEST_ONLY) {
-  updateHash = function(
-    hostname: string,
-    repoName: string,
-    hash: string | null
-  ) {
-    let p = hash
-    if (!hash) {
-      p = 'null'
-    }
-    console.log(
-      sprintf(
-        'TEST updateHash host:%s repoName:%s hash:%s',
-        hostname,
-        repoName,
-        p
-      )
-    )
-  }
-  moveRepoToBackup = function(repo: string) {
-    console.log(sprintf('TEST moveRepoToBackup repo:%s', repo))
-  }
-  fs.unlink = function(file: string) {
-    console.log(sprintf('TEST fs.unlink file:%s', file))
-  }
-}
 
 mainLoop()
 
@@ -76,7 +49,18 @@ async function mainLoop() {
       commit = commit.replace(/(\r\n|\n|\r)/gm, '')
       // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
       // console.log('  [git rev-parse success] ' + commit)
-      await updateHash(hostname, repoName, commit)
+      if (TEST_ONLY) {
+        console.log(
+          sprintf(
+            'TEST updateHash host:%s repoName:%s hash:%s',
+            hostname,
+            repoName,
+            commit || 'null'
+          )
+        )
+      } else {
+        await updateHash(hostname, repoName, commit)
+      }
       console.log(
         sprintf(
           'writeDb %d/%d SUCCESS %-5s %-41s %-41s',
@@ -196,9 +180,13 @@ async function getLocalDirs() {
 
             if (MOVE_INVALID_REPOS && emptyRepo && invalidRepoName) {
               console.log('  Archiving invalid repo: ' + path2)
-              try {
-                moveRepoToBackup(repo)
-              } catch (e) {}
+              if (TEST_ONLY) {
+                console.log(sprintf('TEST moveRepoToBackup repo:%s', repo))
+              } else {
+                try {
+                  moveRepoToBackup(repo)
+                } catch (e) {}
+              }
 
               // Remove from DB
               // await updateHash(hostname, repo, null)
