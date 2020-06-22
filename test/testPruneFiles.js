@@ -3,9 +3,12 @@
  * @flow
  */
 
-import type { PruneFilesParams } from '../src/common/pruneBackupsInner.js'
-const { pruneFiles } = require('../lib/common/pruneBackupsInner.js')
-const { sprintf } = require('sprintf-js')
+import { sprintf } from 'sprintf-js'
+
+import {
+  type PruneFilesParams,
+  pruneFiles
+} from '../src/common/pruneBackupsInner.js'
 
 const NUM_DAYS_HOURLY_BACKUP = 1
 const NUM_MONTHS_DAILY_BACKUP = 1

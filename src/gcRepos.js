@@ -1,12 +1,13 @@
 // @flow
 
-const fs = require('fs')
-const {
+import fs from 'fs'
+
+import {
   dateString,
+  getRepoListFile,
   getReposDir,
-  snooze,
-  getRepoListFile
-} = require('./common/syncUtils.js')
+  snooze
+} from './common/syncUtils.js'
 
 const LOOP_DELAY_MILLISECONDS = 5000
 

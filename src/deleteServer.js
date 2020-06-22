@@ -2,12 +2,15 @@
  * Created by paul on 6/17/17.
  * @flow
  */
-const sprintf = require('sprintf-js').sprintf
-const { getCouchUrl } = require('./common/syncUtils.js')
+
+import nano from 'nano'
+import { sprintf } from 'sprintf-js'
+
+import { getCouchUrl } from './common/syncUtils.js'
+import { updateHash } from './common/updateHashInner.js'
+
 const url = getCouchUrl()
-const nano = require('nano')(url)
-const { updateHash } = require('./common/updateHashInner.js')
-const _dbRepos = nano.db.use('db_repos')
+const _dbRepos = nano(url).db.use('db_repos')
 
 async function mainLoop() {
   if (process.argv.length < 3) {

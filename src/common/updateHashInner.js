@@ -3,14 +3,19 @@
  * @flow
  */
 
-const { getConfig, isReservedRepoName } = require('./syncUtils.js')
-const config = getConfig()
-const sprintf = require('sprintf-js').sprintf
-const url = sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
-const nano = require('nano')(url)
-const _dbRepos = nano.db.use('db_repos')
+import nano from 'nano'
 
-async function updateHash(server: string, repo: string, hash: string | null) {
+import { getConfig, isReservedRepoName } from './syncUtils.js'
+
+const config = getConfig()
+const url = `http://admin:${config.couchAdminPassword}@localhost:5984`
+const _dbRepos = nano(url).db.use('db_repos')
+
+export async function updateHash(
+  server: string,
+  repo: string,
+  hash: string | null
+): Promise<true> {
   // console.log('ENTER writeDb:' + repo + ' hash:' + hash)
   return new Promise((resolve, reject) => {
     _dbRepos.get(repo, function(err, response) {
@@ -66,7 +71,7 @@ async function insertDb(server, repo, hash: string | null, repoObj: any = {}) {
   })
 }
 
-async function deleteRepoRecord(repo: string) {
+export async function deleteRepoRecord(repo: string): Promise<boolean> {
   console.log('deleteRepoRecord: ' + repo)
   return new Promise((resolve, reject) => {
     if (isReservedRepoName(repo)) {
@@ -92,5 +97,3 @@ async function deleteRepoRecord(repo: string) {
     })
   })
 }
-
-module.exports = { updateHash, deleteRepoRecord }

@@ -3,19 +3,21 @@
  * @flow
  */
 
-const childProcess = require('child_process')
-const { sprintf } = require('sprintf-js')
-const config = require('../../syncConfig.json')
-const fs = require('fs')
+import childProcess from 'child_process'
+import fs from 'fs'
+
+import config from '../../syncConfig.json'
 
 const rootDir = config.userDir + config.reposDir
 
-function isHex(h: string) {
-  const out = /^[0-9A-F]+$/i.test(h)
-  return out
+export function isHex(h: string): boolean {
+  return /^[0-9A-F]+$/i.test(h)
 }
 
-function parseIntSafe(result?: Array<string> | null, idx: number): number {
+export function parseIntSafe(
+  result?: Array<string> | null,
+  idx: number
+): number {
   if (result && result[idx]) {
     return parseInt(result[idx])
   } else {
@@ -23,15 +25,15 @@ function parseIntSafe(result?: Array<string> | null, idx: number): number {
   }
 }
 
-function isReservedRepoName(repoName: string) {
+export function isReservedRepoName(repoName: string): boolean {
   return repoName === '00000000_servers'
 }
 
-function getConfig() {
+export function getConfig() {
   return config
 }
 
-function moveRepoToBackup(repoName: string) {
+export function moveRepoToBackup(repoName: string) {
   const localPath = getRepoPath(repoName)
   let index = 0
   let newdir
@@ -59,31 +61,31 @@ function moveRepoToBackup(repoName: string) {
   }
 }
 
-function getAuthBackupsDir() {
+export function getAuthBackupsDir(): string {
   return config.authBackupsDir
 }
 
-function getRepoPath(repo: string): string {
+export function getRepoPath(repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2) + '/' + repo
   return fullPath
 }
 
-function getFailedReposFileName(): string {
+export function getFailedReposFileName(): string {
   return config.userDir + config.failedRepos
 }
 
-function getCouchUrl(): string {
-  return sprintf('http://admin:%s@localhost:5984', config.couchAdminPassword)
+export function getCouchUrl(): string {
+  return `http://admin:${config.couchAdminPassword}@localhost:5984`
 }
 
-function getRepoListFile(): string {
+export function getRepoListFile(): string {
   return config.repoListPath + 'repolist.txt'
 }
 
-function getReposUrl(): string {
+export function getReposUrl(): string {
   return config.reposUrl.toLowerCase()
 }
-function getHostname(): string {
+export function getHostname(): string {
   const hostname = easyEx(null, 'hostname')
   const hostArray = hostname.split('.')
   let host = hostArray[0]
@@ -91,29 +93,29 @@ function getHostname(): string {
   return host.toLowerCase()
 }
 
-function getCouchUserPassword(): string {
+export function getCouchUserPassword(): string {
   return config.couchUserPassword
 }
 
-function getCouchAdminPassword(): string {
+export function getCouchAdminPassword(): string {
   return config.couchAdminPassword
 }
 
-function getRepoSubdir(repo: string): string {
+export function getRepoSubdir(repo: string): string {
   const fullPath = rootDir + '/' + repo.slice(0, 2)
   return fullPath
 }
 
-function getReposDir(): string {
+export function getReposDir(): string {
   return rootDir
 }
 
-function dateString() {
+export function dateString(): string {
   const date = new Date()
   return date.toDateString() + ':' + date.toTimeString()
 }
 
-function snooze(ms: number) {
+export function snooze(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
@@ -125,7 +127,7 @@ function snooze(ms: number) {
 //   env: any
 // }
 
-function easyEx(path: string | null, cmdstring: string): string {
+export function easyEx(path: string | null, cmdstring: string): string {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
@@ -141,12 +143,15 @@ function easyEx(path: string | null, cmdstring: string): string {
   } else {
     opts = { encoding: 'utf8', timeout: 20000, killSignal: 'SIGKILL' }
   }
-  // $FlowFixMe return val is a string not a buffer
-  const r: string = childProcess.execFileSync(cmd, args, opts)
-  return r
+  // The output is actually a string, because of our "encoding":
+  const flowHack: any = childProcess.execFileSync(cmd, args, opts)
+  return flowHack
 }
 
-function easyExAsync(path: string | null, cmdstring: string) {
+export function easyExAsync(
+  path: string | null,
+  cmdstring: string
+): Promise<string> {
   const cmdArray = cmdstring.split(' ')
   const cmd = cmdArray[0]
   const args = cmdArray.slice(1, cmdArray.length)
@@ -167,32 +172,10 @@ function easyExAsync(path: string | null, cmdstring: string) {
       if (err) {
         reject(err)
       } else {
-        resolve(stdout)
+        // The output is actually a string, because of our "encoding":
+        const flowHack: any = stdout
+        resolve(flowHack)
       }
     })
   })
-}
-// createRepo('12lakjaweoigjaoewigjaogji')
-
-module.exports = {
-  getAuthBackupsDir,
-  easyEx,
-  easyExAsync,
-  snooze,
-  dateString,
-  getReposDir,
-  getRepoListFile,
-  getHostname,
-  getReposUrl,
-  getRepoSubdir,
-  parseIntSafe,
-  moveRepoToBackup,
-  getCouchUrl,
-  getCouchUserPassword,
-  getCouchAdminPassword,
-  getFailedReposFileName,
-  getRepoPath,
-  getConfig,
-  isReservedRepoName,
-  isHex
 }

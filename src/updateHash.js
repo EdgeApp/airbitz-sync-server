@@ -2,7 +2,8 @@
  * Created by paul on 6/17/17.
  * @flow
  */
-const { updateHash } = require('./common/updateHashInner.js')
+
+import { updateHash } from './common/updateHashInner.js'
 
 async function main() {
   if (process.argv.length < 5) {

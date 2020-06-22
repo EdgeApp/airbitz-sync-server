@@ -3,17 +3,16 @@
  * @flow
  */
 
-const util = require('util')
-const fs = require('fs')
-const mkdirp = require('mkdirp')
-const { getRepoPath, easyExAsync } = require('./syncUtils.js')
+import fs from 'fs'
+import mkdirp from 'mkdirp'
+import util from 'util'
 
-// $FlowFixMe
+import { easyExAsync, getRepoPath } from './syncUtils.js'
+
 const fsstat = util.promisify(fs.stat)
-// $FlowFixMe
 const mkdirpp = util.promisify(mkdirp)
 
-async function createRepo(repo: string) {
+export async function createRepo(repo: string) {
   const fullPath = getRepoPath(repo)
   let stat = null
 
@@ -52,7 +51,7 @@ async function createRepo(repo: string) {
     await easyExAsync(fullPath, 'rm -rf hooks')
     await easyExAsync(fullPath, 'rm -f description')
     await easyExAsync(fullPath, 'ln -s /etc/absync/hooks')
-    // const cmd = sprintf('chown -R %s:%s .', config.user, config.group)
+    // const cmd = `chown -R ${config.user}:${config.group} .`
     // easyEx(fullPath, cmd)
   } catch (e) {
     console.log(e)
@@ -61,5 +60,3 @@ async function createRepo(repo: string) {
 
   return true
 }
-
-module.exports = { createRepo }

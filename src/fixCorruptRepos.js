@@ -1,34 +1,21 @@
 // @flow
 
-const fs = require('fs')
-const { sprintf } = require('sprintf-js')
-// const childProcess = require('child_process')
+import fs from 'fs'
+import { sprintf } from 'sprintf-js'
 
-let { deleteRepoRecord } = require('./common/updateHashInner.js')
-let {
+import {
   dateString,
+  easyEx,
   getReposDir,
   isHex,
-  easyEx,
-  parseIntSafe,
-  moveRepoToBackup
-} = require('./common/syncUtils.js')
+  moveRepoToBackup,
+  parseIntSafe
+} from './common/syncUtils.js'
+import { deleteRepoRecord } from './common/updateHashInner.js'
 
 console.log(dateString() + ' updateReposHashes.js starting')
 
 const TEST_ONLY = false // Set to true to not execute any disk write functions
-
-if (TEST_ONLY) {
-  moveRepoToBackup = function(repo: string) {
-    console.log(sprintf('TEST moveRepoToBackup repo:%s', repo))
-  }
-  deleteRepoRecord = function(repo: string) {
-    console.log(sprintf('TEST deleteRepoRecord repo:%s', repo))
-  }
-  fs.unlink = function(file: string) {
-    console.log(sprintf('TEST fs.unlink file:%s', file))
-  }
-}
 
 mainLoop()
 
@@ -153,12 +140,18 @@ async function getLocalDirs() {
               console.log(
                 sprintf('  %d Archiving invalid repo: %s', numCorrupt, path2)
               )
-              try {
-                moveRepoToBackup(repo)
-              } catch (e) {}
 
-              // Remove from DB
-              await deleteRepoRecord(repo)
+              if (TEST_ONLY) {
+                console.log(sprintf('TEST moveRepoToBackup repo:%s', repo))
+                console.log(sprintf('TEST deleteRepoRecord repo:%s', repo))
+              } else {
+                try {
+                  moveRepoToBackup(repo)
+                } catch (e) {}
+
+                // Remove from DB
+                await deleteRepoRecord(repo)
+              }
             } else {
               allDirs.push(dir2[f2])
             }

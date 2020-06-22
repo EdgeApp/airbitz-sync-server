@@ -3,16 +3,14 @@
  * @flow
  */
 
-import type { PruneFilesParams } from './common/pruneBackupsInner.js'
+import fs from 'fs'
+import { sprintf } from 'sprintf-js'
 
-const fs = require('fs')
-const { sprintf } = require('sprintf-js')
-const { pruneFiles } = require('./common/pruneBackupsInner.js')
-const {
-  getAuthBackupsDir,
-  snooze,
-  dateString
-} = require('./common/syncUtils.js')
+import {
+  type PruneFilesParams,
+  pruneFiles
+} from './common/pruneBackupsInner.js'
+import { dateString, getAuthBackupsDir, snooze } from './common/syncUtils.js'
 
 const NUM_DAYS_HOURLY_BACKUP = 1
 const NUM_MONTHS_DAILY_BACKUP = 1
