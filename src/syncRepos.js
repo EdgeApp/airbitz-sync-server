@@ -15,13 +15,11 @@ import {
   getFailedReposFileName,
   getHostname,
   getRepoPath,
-  getReposDir,
   snooze
 } from './common/syncUtils.js'
 import { updateHash } from './common/updateHashInner.js'
 
 const writeFile = util.promisify(fsCallback.writeFile)
-const rename = util.promisify(fsCallback.rename)
 
 const url = getCouchUrl()
 
@@ -107,14 +105,12 @@ async function syncRepoAllServers(
       syncedHash !== hashMap[serverName]
     ) {
       if (host !== serverName) {
-        // console.log('Pulling repo:' + repo + ' hash:' + hashMap[serverName])
-        // await snooze(5000)
-        // console.log('Done pulling repo:' + repo)
-        // const ret = true
-        const ret = await pullRepoFromServer(repo, servers[s])
-        if (ret) {
+        try {
+          await pullRepoFromServer(repo, servers[s])
           success = true
           syncedHash = hashMap[serverName]
+        } catch (e) {
+          console.log(String(e))
         }
       }
     }
@@ -170,79 +166,27 @@ async function main() {
 
 async function pullRepoFromServer(
   repoName: string,
-  server: ServerInfo,
-  retry = true
-) {
-  const date = new Date()
+  server: ServerInfo
+): Promise<void> {
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
-  console.log(
-    `${date.toDateString()}:${date.toTimeString()} pullRepoFromServer:${
-      server.name
-    } ${repoName}`
-  )
+  const syncCmd = `ab-sync ${localPath} ${serverPath}`
+  console.log(syncCmd)
 
   await createRepo(repoName)
-
-  const status = {
-    branch: false,
-    absync: false,
-    find: false,
-    push: false,
-    writedb: false
-  }
-
-  try {
-    await easyExAsync(localPath, 'git branch -D incoming')
-    status.branch = true
-  } catch (e) {}
-
-  let retval = ''
-  try {
-    let cmd = `ab-sync ${localPath} ${serverPath}`
+  await easyExAsync(localPath, 'git branch -D incoming').catch(() => undefined)
+  await easyExAsync(localPath, syncCmd)
+  const findResult = await easyExAsync(localPath, 'find objects -type f').catch(
+    () => 'hasfile'
+  )
+  if (findResult.length > 0) {
+    const cmd = `git push ${serverPath} master`
     await easyExAsync(localPath, cmd)
-    status.absync = true
-
-    try {
-      retval = await easyExAsync(localPath, 'find objects -type f')
-      status.find = true
-    } catch (e) {
-      status.find = true
-      retval = 'hasfile'
-    }
-
-    // Mark the backup directory for deletion
-    if (!retry) {
-      try {
-        const bakdir = getReposDir() + '.bak/' + repoName
-        await rename(bakdir, bakdir + '.deleteme')
-      } catch (e) {}
-    }
-
-    if (retval.length > 0) {
-      cmd = `git push ${serverPath} master`
-      await easyExAsync(localPath, cmd)
-      status.push = true
-    }
-
-    retval = await easyExAsync(localPath, 'git rev-parse HEAD')
-    retval = retval.replace(/(\r\n|\n|\r)/gm, '')
-  } catch (e) {
-    console.log(`  FAILED: ${repoName}`)
-    console.log(status)
-    return false
   }
 
-  retval = await updateHash(host, repoName, retval)
-  if (!retval) {
-    status.writedb = retval
-    console.log(`  FAILED:  ${repoName}`)
-    console.log(retval)
-    return false
-  } else {
-    console.log(`  SUCCESS: ${repoName}`)
-    return true
-  }
+  let head = await easyExAsync(localPath, 'git rev-parse HEAD')
+  head = head.replace(/(\r\n|\n|\r)/gm, '')
+  await updateHash(host, repoName, head)
 }
 
 main()
