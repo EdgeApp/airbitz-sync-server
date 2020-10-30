@@ -43,11 +43,7 @@ export function moveRepoToBackup(repoName: string) {
         getReposDir() + '.bak/' + repoName + '.' + ('0000' + index).slice(-3)
       fs.renameSync(localPath, newdir)
       console.log('rename successful: ' + localPath + ' -> ' + newdir)
-      try {
-        fs.rmdirSync(localPath)
-      } catch (e) {
-        console.log(e)
-      }
+
       break
     } catch (e) {
       console.log('Error code:' + e.code)
