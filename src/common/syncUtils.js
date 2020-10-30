@@ -108,7 +108,7 @@ export function getReposDir(): string {
 
 export function dateString(): string {
   const date = new Date()
-  return date.toDateString() + ':' + date.toTimeString()
+  return date.toISOString()
 }
 
 export function snooze(ms: number): Promise<void> {
