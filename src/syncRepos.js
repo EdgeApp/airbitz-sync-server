@@ -19,7 +19,9 @@ import {
   snooze
 } from './common/syncUtils.js'
 import { updateHash } from './common/updateHashInner.js'
+import { moveRepos } from './moveRepos.js'
 
+const readFile = util.promisify(fsCallback.readFile)
 const writeFile = util.promisify(fsCallback.writeFile)
 const rename = util.promisify(fsCallback.rename)
 
@@ -160,10 +162,22 @@ async function main() {
       console.log(`${dateString()} COMPLETE No Failed Repos`)
     }
     try {
-      await writeFile(getFailedReposFileName(), JSON.stringify(failArray))
+      const oldFailMap = await readFile(getFailedReposFileName()).then(x => JSON.parse(x)).catch(e => { return {} })
+      const newFailMap = {}
+      failArray.map(f => {
+        newFailMap[f] = 1
+      })
+      Object.keys(oldFailMap).map(repo => {
+        if (newFailMap[repo]) {
+          newFailMap[repo] += oldFailMap[repo]
+        }
+      })
+
+      await writeFile(getFailedReposFileName(), JSON.stringify(newFailMap))
     } catch (e) {
       console.log(e)
     }
+    await moveRepos()
     await snooze(5000)
   }
 }
