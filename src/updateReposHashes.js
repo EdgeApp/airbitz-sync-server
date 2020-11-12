@@ -15,7 +15,7 @@ import {
   moveRepoToBackup,
   parseIntSafe
 } from './common/syncUtils.js'
-import { updateHash } from './common/updateHashInner.js'
+import { updateHash, getRepoHash } from './common/updateHashInner.js'
 
 console.log(dateString() + ' updateReposHashes.js starting')
 
@@ -35,20 +35,9 @@ async function mainLoop() {
   let n = 0
   for (const repoName of localRepos) {
     n++
-    const localPath = getRepoPath(repoName)
     let commit = ''
     try {
-      // console.log(localPath)
-      commit = childProcess.execFileSync('git', ['rev-parse', 'HEAD'], {
-        encoding: 'utf8',
-        timeout: 3000,
-        cwd: localPath,
-        killSignal: 'SIGKILL'
-      })
-      // $FlowFixMe
-      commit = commit.replace(/(\r\n|\n|\r)/gm, '')
-      // const commit = child_process.execFileSync('git', ['rev-parse', 'HEAD'], { timeout: 3000, stdio: std_noerr, cwd: localPath, killSignal: 'SIGKILL' })
-      // console.log('  [git rev-parse success] ' + commit)
+      commit = await getRepoHash(repoName)
       if (TEST_ONLY) {
         console.log(
           sprintf(
