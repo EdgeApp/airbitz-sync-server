@@ -4,12 +4,35 @@
  */
 
 import nano from 'nano'
+import childProcess from 'child_process'
+// import util from 'util'
 
-import { getConfig, isReservedRepoName } from './syncUtils.js'
+import {
+  getConfig, isReservedRepoName, getRepoPath
+} from './syncUtils.js'
 
 const config = getConfig()
 const url = `http://admin:${config.couchAdminPassword}@localhost:5984`
 const _dbRepos = nano(url).db.use('db_repos')
+// const execFile = util.promisify(childProcess.execFile)
+
+export async function getRepoHash(repoName: string): Promise<string> {
+  const localPath = getRepoPath(repoName)
+  let commit = ''
+  try {
+    commit = childProcess.execFileSync('git', ['rev-parse', 'HEAD'], {
+      encoding: 'utf8',
+      timeout: 3000,
+      cwd: localPath,
+      killSignal: 'SIGKILL'
+    })
+    // $FlowFixMe
+    commit = commit.replace(/(\r\n|\n|\r)/gm, '')
+  } catch (e) {
+    return ''
+  }
+  return commit
+}
 
 export async function updateHash(
   server: string,

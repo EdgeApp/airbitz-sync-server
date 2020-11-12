@@ -18,7 +18,7 @@ import {
   getReposDir,
   snooze
 } from './common/syncUtils.js'
-import { updateHash } from './common/updateHashInner.js'
+import { updateHash, getRepoHash } from './common/updateHashInner.js'
 import { moveRepos } from './moveRepos.js'
 
 const readFile = util.promisify(fsCallback.readFile)
@@ -91,9 +91,10 @@ async function syncRepoAllServers(
   failArray: Array<string>
 ) {
   shuffle(servers)
-  let syncedHash: string = ''
   const repo = diff.id
   const hashMap = diff.value
+  let syncedHash: string = await getRepoHash(repo).catch(e => '')
+  // console.log(`host: ${host} repo: ${repo} getRepoHash ${syncedHash}`)
 
   if (hashMap['ip-172-31-10-198'] != null && hashMap.git3 == null) {
     hashMap.git3 = hashMap['ip-172-31-10-198']
@@ -101,24 +102,34 @@ async function syncRepoAllServers(
     console.log('fixed doc', hashMap)
   }
 
-  let success = false
+  if (syncedHash.length > 1 && hashMap[host] !== syncedHash) {
+    console.log(`Hash mismatch repo:${repo} db:${hashMap[host]} disk:${syncedHash}`)
+    await updateHash(host, repo, syncedHash).catch(e => undefined)
+    hashMap[host] = syncedHash
+  }
+
+  let success = true
   for (let s = 0; s < servers.length; s++) {
     const serverName = servers[s].name
-    if (
-      hashMap[serverName] !== undefined &&
-      syncedHash !== hashMap[serverName]
-    ) {
-      if (host !== serverName) {
-        // console.log('Pulling repo:' + repo + ' hash:' + hashMap[serverName])
-        // await snooze(5000)
-        // console.log('Done pulling repo:' + repo)
-        // const ret = true
-        const ret = await pullRepoFromServer(repo, servers[s])
-        if (ret) {
-          success = true
-          syncedHash = hashMap[serverName]
-        }
-      }
+    if (host === serverName) continue
+
+    if (hashMap[serverName] === undefined) {
+      // console.log(` repo:${repo} target server has no hash ${serverName}`)
+      continue
+    }
+    if (syncedHash === hashMap[serverName]) {
+      // console.log(` repo:${repo} target server hash matches ${serverName} ${syncedHash}`)
+      continue
+    }
+    // console.log('Pulling repo:' + repo + ' hash:' + hashMap[serverName])
+    // await snooze(5000)
+    // console.log('Done pulling repo:' + repo)
+    // const ret = true
+    const ret = await pullRepoFromServer(repo, servers[s])
+    if (ret) {
+      syncedHash = hashMap[serverName]
+    } else {
+      success = false
     }
   }
   if (!success) {
@@ -139,7 +150,7 @@ async function main() {
     for (let n = 0; n < array.length; n++) {
       const diff = array[n]
       console.log(
-        `Syncing repo ${n} of ${array.length} failed:${failArray.length}`
+        `Syncing repo ${diff.id} ${n} of ${array.length} failed:${failArray.length}`
       )
       if (typeof diff.value.servers !== 'undefined') {
         continue
@@ -191,7 +202,7 @@ async function pullRepoFromServer(
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
   console.log(
-    `${date.toDateString()}:${date.toTimeString()} pullRepoFromServer:${
+    `${dateString()} pullRepoFromServer:${
       server.name
     } ${repoName}`
   )
