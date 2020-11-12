@@ -202,7 +202,7 @@ async function pullRepoFromServer(
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
   console.log(
-    `${date.toDateString()}:${date.toTimeString()} pullRepoFromServer:${
+    `${dateString()} pullRepoFromServer:${
       server.name
     } ${repoName}`
   )
