@@ -35,6 +35,10 @@ let servers = []
 
 const host = getHostname()
 
+function phash(hash?: string) {
+  return hash ? hash.slice(0, 6) : ''
+}
+
 type ServerInfo = {
   name: string,
   url: string,
@@ -103,7 +107,7 @@ async function syncRepoAllServers(
   }
 
   if (syncedHash.length > 1 && hashMap[host] !== syncedHash) {
-    console.log(`Hash mismatch repo:${repo} db:${hashMap[host]} disk:${syncedHash}`)
+    console.log(`Hash mismatch repo:${repo} db:${phash(hashMap[host])} disk:${phash(syncedHash)}`)
     await updateHash(host, repo, syncedHash).catch(e => undefined)
     hashMap[host] = syncedHash
   }
@@ -125,9 +129,9 @@ async function syncRepoAllServers(
     // await snooze(5000)
     // console.log('Done pulling repo:' + repo)
     // const ret = true
-    const ret = await pullRepoFromServer(repo, servers[s])
-    if (ret) {
-      syncedHash = hashMap[serverName]
+    const ret = await pullRepoFromServer(repo, servers[s], syncedHash, hashMap[serverName])
+    if (ret !== '') {
+      syncedHash = ret
     } else {
       success = false
     }
@@ -196,15 +200,17 @@ async function main() {
 async function pullRepoFromServer(
   repoName: string,
   server: ServerInfo,
+  myHash: string,
+  theirHash: string,
   retry = true
-) {
+): Promise<string> {
   const date = new Date()
   const serverPath = server.url + repoName
   const localPath = getRepoPath(repoName)
   console.log(
     `${dateString()} pullRepoFromServer:${
       server.name
-    } ${repoName}`
+    } ${repoName} ${phash(myHash)} ${phash(theirHash)}`
   )
 
   await createRepo(repoName)
@@ -253,20 +259,20 @@ async function pullRepoFromServer(
     retval = await easyExAsync(localPath, 'git rev-parse HEAD')
     retval = retval.replace(/(\r\n|\n|\r)/gm, '')
   } catch (e) {
-    console.log(`  FAILED: ${repoName}`)
+    console.log(`${dateString()} pullRepoFromServer:${server.name} FAILED git ${repoName}`)
     console.log(status)
-    return false
+    return ''
   }
 
-  retval = await updateHash(host, repoName, retval)
-  if (!retval) {
-    status.writedb = retval
-    console.log(`  FAILED:  ${repoName}`)
+  const success = await updateHash(host, repoName, retval)
+  if (!success) {
+    status.writedb = success
+    console.log(`${dateString()} pullRepoFromServer:${server.name} FAILED updateHash ${repoName}`)
     console.log(retval)
-    return false
+    return ''
   } else {
-    console.log(`  SUCCESS: ${repoName}`)
-    return true
+    console.log(`${dateString()} pullRepoFromServer:${server.name} SUCCESS ${repoName} ${phash(retval)}`)
+    return retval
   }
 }
 
